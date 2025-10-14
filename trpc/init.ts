@@ -26,5 +26,5 @@ if (!session) {
     message: 'Unauthorized',
    });
 }
-    return next({ctx : { ...ctx, auth: session }});
+    return next({ctx: { ...ctx, auth: session }});
 });

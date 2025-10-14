@@ -1,41 +1,39 @@
 import { inngest } from "./client";
 import prisma from "@/lib/db";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { createOpenAI } from "@ai-sdk/openai";
+import { createAnthropic } from "@ai-sdk/anthropic";
+import { generateText } from "ai"
 
-export const helloWorld = inngest.createFunction(
-  { id: "hello-world" },
-  { event: "test/hello.world" },
-  async ({ event, step }) => {
-    console.log("Starting hello world workflow with data:", event.data);
+const google = createGoogleGenerativeAI();
+const openai = createOpenAI();
+const anthropic = createAnthropic();
 
-    // Fetch Video
-    await step.sleep("fetching", "5s");
-    console.log("Video fetched");
-
-    // Transcribing
-    await step.sleep("transcribing", "5s");
-    console.log("Transcription completed");
-
-    // Sending transcription to AI
-    await step.sleep("sending-to-ai", "5s");
-    console.log("AI processing completed");
-
-    // Create workflow
-    const workflow = await step.run("create-workflow", async () => {
-      try {
-        const newWorkflow = await prisma.workflow.create({
-          data: {
-            name: `workflow-from-inngest-${Date.now()}`,
-          },
-        });
-        console.log("Workflow created successfully:", newWorkflow.id);
-        return newWorkflow;
-      } catch (error) {
-        console.error("Failed to create workflow:", error);
-        throw error;
-      }
-    });
-
-    console.log("Hello world workflow completed successfully");
-    return workflow;
-  },
+export const execute = inngest.createFunction(
+    { id: "execute-ai" },
+    { event: "execute/ai" },
+    async ({ event, step }) => {
+        const { steps: geminiSteps } = await step.ai.wrap("gemini-generate-text",
+            generateText, {
+            system: "You are a helpful assistant.",
+            prompt: "Latest version of Nextjs?",
+            model: google("gemini-2.0-flash"),
+        }
+        )
+        const { steps: openaiSteps } = await step.ai.wrap("openai-generate-text",
+            generateText, {
+            system: "You are a helpful assistant.",
+            prompt: "Latest version of Nextjs?",
+            model: openai("gpt-4"),
+        }
+        )
+        const { steps: anthropicSteps } = await step.ai.wrap("anthropic-generate-text",
+            generateText, {
+            system: "You are a helpful assistant.",
+            prompt: "Latest version of Nextjs?",
+            model: anthropic("claude-4-5-sonnet"),
+        }
+        )
+        return { geminiSteps, openaiSteps, anthropicSteps };
+    },
 );
