@@ -11,15 +11,22 @@
   "dependencies": {
     "@prisma/client": "^6.17.1",
     "@radix-ui/react-slot": "^1.2.3",
+    "@tanstack/react-query": "^5.90.3",
+    "@trpc/client": "^11.6.0",
+    "@trpc/server": "^11.6.0",
+    "@trpc/tanstack-react-query": "^11.6.0",
     "class-variance-authority": "^0.7.1",
+    "client-only": "^0.0.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.545.0",
     "next": "15.5.5",
     "prisma": "^6.17.1",
     "react": "19.1.0",
     "react-dom": "19.1.0",
+    "server-only": "^0.0.1",
     "tailwind-merge": "^3.3.1",
-    "tsx": "^4.20.6"
+    "tsx": "^4.20.6",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
