@@ -12,6 +12,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ShimmerButton } from "@/components/ui/shimmer-button";
+import { authClient } from "@/lib/auth-client";
 
 const loginSchema = z.object({
     email: z.email("Please enter a valid email address"),
@@ -31,13 +33,24 @@ export function LoginForm() {
     });
 
     const onSubmit = async (values: LoginFormValues) => {
-        console.log(values);
+        await authClient.signIn.email({
+            email: values.email,
+            password: values.password,
+            callbackURL: "/",
+        }, {
+            onSuccess: () => {
+                router.push("/");
+            },
+            onError: (ctx) => {
+                toast.error(ctx.error.message);
+            },
+        });
     };
 
     const isPending = form.formState.isSubmitting;
 
     return (
-        <div className="flex flex-col gap-6 max-w-md mx-auto">
+        <div className="flex flex-col gap-6 max-w-md mx-auto mt-32 w-1/4">
             <Card>
                 <CardHeader className="text-center">
                     <CardTitle>Welcome back</CardTitle>
@@ -49,12 +62,12 @@ export function LoginForm() {
                             <div className="grid gap-6">
                                 <div className="flex flex-col gap-4">
                                     <Button variant="outline"
-                                        className="w-full"
+                                        className="w-full cursor-pointer"
                                         type="button"
                                         disabled={isPending}
                                     >Continue with GitHub</Button>
                                     <Button variant="outline"
-                                        className="w-full"
+                                        className="w-full cursor-pointer"
                                         type="button"
                                         disabled={isPending}
                                     >Continue with Google</Button>
@@ -90,10 +103,10 @@ export function LoginForm() {
                                             </FormItem>
                                         )}
                                     />
-                                    <Button type="submit"
+                                    <ShimmerButton type="submit"
                                         disabled={isPending}
-                                        className="w-full"
-                                    >Login</Button>
+                                        className="w-full cursor-pointer"
+                                    >Login</ShimmerButton>
                                 </div>
                                 <div className="text-center text-sm">
                                     Don't have an account?{" "}

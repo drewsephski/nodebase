@@ -10,11 +10,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
 model User {
-  id            Int       @id @default(autoincrement())
-  email         String    @unique
-  name          String?
-  posts         Post[]
+  id            String    @id
+  name          String
+  email         String
   emailVerified Boolean   @default(false)
   image         String?
   createdAt     DateTime  @default(now())
@@ -22,16 +22,8 @@ model User {
   sessions      Session[]
   accounts      Account[]
 
+  @@unique([email])
   @@map("user")
-}
-
-model Post {
-  id        Int     @id @default(autoincrement())
-  title     String
-  content   String?
-  published Boolean @default(false)
-  authorId  Int
-  author    User    @relation(fields: [authorId], references: [id])
 }
 
 model Session {
@@ -42,7 +34,7 @@ model Session {
   updatedAt DateTime @updatedAt
   ipAddress String?
   userAgent String?
-  userId    Int
+  userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([token])
@@ -53,7 +45,7 @@ model Account {
   id                    String    @id
   accountId             String
   providerId            String
-  userId                Int
+  userId                String
   user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   accessToken           String?
   refreshToken          String?

@@ -12,32 +12,55 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ShimmerButton } from "@/components/ui/shimmer-button";
+import { authClient } from "@/lib/auth-client";
 
-const loginSchema = z.object({
+const registerSchema = z.object({
     email: z.email("Please enter a valid email address"),
     password: z.string().min(1, "Password is required"),
-});
+    confirmPassword: z.string(),
+})
+.refine(data => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+})
 
-type LoginFormValues = z.infer<typeof loginSchema>;
+type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export function RegisterForm() {
     const router = useRouter();
-    const form = useForm<LoginFormValues>({
-        resolver: zodResolver(loginSchema),
+    const form = useForm<RegisterFormValues>({
+        resolver: zodResolver(registerSchema),
         defaultValues: {
             email: "",
             password: "",
+            confirmPassword: "",
         },
     });
 
-    const onSubmit = async (values: LoginFormValues) => {
-        console.log(values);
+    const onSubmit = async (values: RegisterFormValues) => {
+        await authClient.signUp.email(
+            {
+                email: values.email,
+                password: values.password,
+                name: values.email,
+                callbackURL: "/",
+            },
+            {
+                onSuccess: () => {
+                    router.push("/");
+                },
+                onError: (ctx) => {
+                    toast.error(ctx.error.message);
+                },
+            }
+        )
     };
 
     const isPending = form.formState.isSubmitting;
 
     return (
-        <div className="flex flex-col gap-6 max-w-md mx-auto">
+        <div className="flex flex-col gap-6 max-w-md mx-auto mt-32 w-1/4">
             <Card>
                 <CardHeader className="text-center">
                     <CardTitle>Register</CardTitle>
@@ -49,12 +72,12 @@ export function RegisterForm() {
                             <div className="grid gap-6">
                                 <div className="flex flex-col gap-4">
                                     <Button variant="outline"
-                                        className="w-full"
+                                        className="w-full cursor-pointer"
                                         type="button"
                                         disabled={isPending}
                                     >Continue with GitHub</Button>
                                     <Button variant="outline"
-                                        className="w-full"
+                                        className="w-full cursor-pointer"
                                         type="button"
                                         disabled={isPending}
                                     >Continue with Google</Button>
@@ -90,14 +113,29 @@ export function RegisterForm() {
                                             </FormItem>
                                         )}
                                     />
-                                    <Button type="submit"
+                                     <FormField
+                                        control={form.control}
+                                        name="confirmPassword"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Confirm Password</FormLabel>
+                                                <FormControl>
+                                                    <Input {...field}
+                                                        type="password"
+                                                        placeholder="*********" />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <ShimmerButton type="submit"
                                         disabled={isPending}
-                                        className="w-full"
-                                    >Register</Button>
+                                        className="w-full cursor-pointer"
+                                    >Register</ShimmerButton>
                                 </div>
                                 <div className="text-center text-sm">
                                     Already have an account?{" "}
-                                    <Link href="/login" className="underline underline-offset-4">Login</Link>
+                                    <Link href="/login" className="underline underline-offset-4 cursor-pointer">Login</Link>
                                 </div>
                             </div>
                         </form>

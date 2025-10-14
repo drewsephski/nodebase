@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { TRPCReactProvider } from "@/trpc/client";
-
+import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
+import { ThemeProvider } from "next-themes";
+import { LightRays } from "@/components/ui/light-rays";
+import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,11 +28,26 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <TRPCReactProvider>{children}</TRPCReactProvider>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-background`}>
+        <TRPCReactProvider>
+          <ThemeProvider attribute="class">
+            {/* LightRays Background */}
+            <div className="fixed inset-0 -z-10 overflow-hidden">
+              <LightRays className="h-full w-full" />
+            </div>
+
+            {/* Main Content */}
+            <div className="relative z-0">
+              <div className="fixed top-4 right-8 z-50">
+                <AnimatedThemeToggler />
+              </div>
+              {children}
+              <Toaster />
+
+            </div>
+          </ThemeProvider>
+        </TRPCReactProvider>
       </body>
     </html>
   );
