@@ -10,18 +10,35 @@ import { toast } from "sonner";
 const Page = () => {
   const trpc = useTRPC();
   const queryClient = new QueryClient();
-  const {data} = useQuery(trpc.getWorkflows.queryOptions());
+  const { data } = useQuery(trpc.getWorkflows.queryOptions());
+
+  const testAi = useMutation(trpc.testAi.mutationOptions({
+    onSuccess: () => {
+      toast("AI Job Queued");
+    },
+  }));
+
   const create = useMutation(trpc.createWorkflow.mutationOptions({
     onSuccess: () => {
-      toast("Job Queued");
+      toast("Workflow Job Queued");
     },
   }));
 
   return (
-    <div className="min-h-screen min-w-screen flex flex-col items-center justify-center">
-      <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
-      {data && <p>Found {data.length} workflows</p>}
-      <Button disabled={create.isPending} onClick={() => create.mutate()}>Create Workflow</Button>
+    <div className="min-h-screen min-w-screen flex items-center justify-center flex-col gap-y-6">
+
+      protected server component
+      <div>
+        {JSON.stringify(data, null, 2)}
+      </div>
+      <Button disabled={testAi.isPending} onClick=
+        {() => testAi.mutate()}> Test AI
+      </Button>
+      <Button disabled={create.isPending} onClick=
+        {() => create.mutate()}>
+
+        Create workflow
+      </Button>
       <LogoutButton />
     </div>
   );
