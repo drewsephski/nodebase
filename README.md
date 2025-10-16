@@ -65,8 +65,8 @@ Open Agent Builder is a visual workflow builder for creating AI agent pipelines 
 | **[Clerk](https://clerk.com)** | Authentication and user management with JWT integration |
 | **[Tailwind CSS](https://tailwindcss.com/)** | Utility-first CSS framework for responsive UI |
 | **[React Flow](https://reactflow.dev/)** | Visual workflow builder canvas with drag-and-drop nodes |
-| **[Anthropic SDK](https://www.anthropic.com/)** | Claude AI integration with native MCP support (Claude Haiku 4.5 & Sonnet 4.5) |
-| **[OpenAI SDK](https://platform.openai.com/)** | gpt-5 integration (MCP support coming soon) |
+| **[Anthropic](https://www.anthropic.com/)** | Claude AI integration with native MCP support (Claude Haiku 4.5 & Sonnet 4.5) |
+| **[OpenAI](https://platform.openai.com/)** | gpt-5 integration (MCP support coming soon) |
 | **[Groq](https://groq.com/)** | Fast inference for open models (MCP support coming soon) |
 | **[E2B](https://e2b.dev)** | Sandboxed code execution for secure transform nodes |
 | **[Vercel](https://vercel.com)** | Deployment platform with edge functions |
