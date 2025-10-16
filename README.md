@@ -275,8 +275,9 @@ npm start
 Anthropic's MCP implementation provides MCP support, other providers are currently in progress.
 
 ### Coming Soon
-- **OpenAI gpt-5** - MCP support in development
-- **Groq** - MCP support in development
+- **OpenAI** - MCP support in development
+- **Gemini** - MCP support in development
+- **Open Router** - coming soon...
 
 ### Using MCP Tools
 
