@@ -3,6 +3,7 @@ import { cache } from "react";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { polarClient } from "@/lib/polar";
+import superjson from "superjson";
 export const createTRPCContext = cache(async () => {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -13,7 +14,9 @@ export const createTRPCContext = cache(async () => {
     session,
   };
 });
-const t = initTRPC.create({});
+const t = initTRPC.create({
+  transformer: superjson,
+});
 export const createTRPCRouter = t.router;
 export const createCallerFactory = t.createCallerFactory;
 export const baseProcedure = t.procedure;
