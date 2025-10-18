@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { TRPCReactProvider } from "@/trpc/client";
-import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 import { ThemeProvider } from "next-themes";
 import { LightRays } from "@/components/ui/light-rays";
 import { Toaster } from "sonner";
@@ -38,9 +37,6 @@ export default function RootLayout({
               <LightRays className="h-full w-full" />
             </div>
             <div className="relative z-0">
-              <div className="fixed top-4 right-8 z-50">
-                <AnimatedThemeToggler />
-              </div>
               {children}
               <Toaster />
             </div>
