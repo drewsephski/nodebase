@@ -144,13 +144,27 @@ export class LangGraphExecutor {
     this.parallelNodeIds.clear();
     this.edgesBySource = new Map();
 
+    // Create a set of valid node IDs for edge validation
+    const validNodeIds = new Set(this.workflow.nodes.map(n => n.id));
+
+    // Build edge map, skipping edges with invalid source/target
     for (const edge of this.workflow.edges) {
+      // Validate that both source and target nodes exist
+      if (!validNodeIds.has(edge.source)) {
+        console.warn(`⚠️ Skipping edge ${edge.id}: source node '${edge.source}' does not exist`);
+        continue;
+      }
+      if (!validNodeIds.has(edge.target)) {
+        console.warn(`⚠️ Skipping edge ${edge.id}: target node '${edge.target}' does not exist`);
+        continue;
+      }
+
       if (!this.edgesBySource.has(edge.source)) {
         this.edgesBySource.set(edge.source, []);
       }
       this.edgesBySource.get(edge.source)!.push(edge);
     }
-    
+
     console.log('Edges by source:', Object.fromEntries(this.edgesBySource));
 
     // Add nodes to the graph
@@ -238,9 +252,15 @@ export class LangGraphExecutor {
 
       // For regular nodes, add their outgoing edges
       for (const edge of sourceEdges) {
-        // Skip edges that connect to note nodes (notes are visual only)
+        // Verify target node exists
         const targetNode = this.workflow.nodes.find(n => n.id === edge.target);
-        const targetType = (targetNode?.data as any)?.nodeType || targetNode?.type;
+        if (!targetNode) {
+          console.warn(`⚠️ Skipping edge ${edge.id}: target node '${edge.target}' not found`);
+          continue;
+        }
+
+        // Skip edges that connect to note nodes (notes are visual only)
+        const targetType = (targetNode.data as any)?.nodeType || targetNode.type;
 
         if (targetType === 'note') {
           console.log(`Skipping edge to note node ${edge.target}`);
@@ -277,7 +297,64 @@ export class LangGraphExecutor {
     }
 
     // Compile the graph WITH checkpointing (required for interrupts/approvals)
-    return builder.compile({ checkpointer: this.checkpointer });
+    try {
+      return builder.compile({ checkpointer: this.checkpointer });
+    } catch (error) {
+      // Provide descriptive error messages for common issues
+      if (error instanceof Error && error.message.includes('is not reachable')) {
+        // Extract the unreachable node ID from the error
+        const match = error.message.match(/Node `([^`]+)` is not reachable/);
+        const unreachableNodeId = match ? match[1] : 'unknown';
+        const unreachableNode = this.workflow.nodes.find(n => n.id === unreachableNodeId);
+        const nodeName = (unreachableNode?.data as any)?.nodeName || unreachableNode?.type || unreachableNodeId;
+
+        // Find what nodes ARE reachable to help debug
+        const allNodeIds = new Set(this.workflow.nodes.map(n => n.id));
+        const connectedFromStart = new Set<string>();
+
+        // BFS from start node to find all reachable nodes
+        const startNode = this.workflow.nodes.find(n => {
+          const nodeType = (n.data as any)?.nodeType || n.type;
+          return nodeType === 'start';
+        });
+
+        if (startNode) {
+          const queue = [startNode.id];
+          connectedFromStart.add(startNode.id);
+
+          while (queue.length > 0) {
+            const currentId = queue.shift()!;
+            const outgoingEdges = this.edgesBySource.get(currentId) || [];
+
+            for (const edge of outgoingEdges) {
+              if (!connectedFromStart.has(edge.target)) {
+                connectedFromStart.add(edge.target);
+                queue.push(edge.target);
+              }
+            }
+          }
+        }
+
+        const unreachableNodes = Array.from(allNodeIds).filter(id => !connectedFromStart.has(id));
+
+        throw new Error(
+          `Workflow configuration error: Node "${nodeName}" (${unreachableNodeId}) is not connected to the workflow.\n\n` +
+          `Unreachable nodes: ${unreachableNodes.map(id => {
+            const node = this.workflow.nodes.find(n => n.id === id);
+            const name = (node?.data as any)?.nodeName || node?.type || id;
+            return `"${name}" (${id})`;
+          }).join(', ')}\n\n` +
+          `To fix this:\n` +
+          `1. Connect the Start node to your first agent/action node\n` +
+          `2. Ensure all nodes have incoming connections (except Start)\n` +
+          `3. Check that all edges point to valid nodes\n\n` +
+          `Tip: Use the canvas to drag connections between node handles`
+        );
+      }
+
+      // Re-throw other errors
+      throw error;
+    }
   }
 
   /**

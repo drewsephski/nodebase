@@ -10,6 +10,7 @@ import {
   saveMCPServer,
   getMCPServers,
 } from '@/lib/workflow/storage';
+import { cleanupInvalidEdges } from '@/lib/workflow/edge-cleanup';
 
 export function useWorkflow(workflowId?: string) {
   const [workflow, setWorkflow] = useState<Workflow | null>(null);
@@ -34,7 +35,19 @@ export function useWorkflow(workflowId?: string) {
           if (loaded) {
             // Fetch full workflow details
             const fullWorkflow = await fetch(`/api/workflows/${workflowId}`).then(r => r.json());
-            const workflowData = fullWorkflow.workflow || loaded;
+            let workflowData = fullWorkflow.workflow || loaded;
+
+            // Clean up any invalid edges before setting the workflow
+            const cleaned = cleanupInvalidEdges(workflowData.nodes, workflowData.edges);
+            if (cleaned.removedCount > 0) {
+              console.log(`🧹 Cleaned ${cleaned.removedCount} invalid edges from loaded workflow`);
+              workflowData = {
+                ...workflowData,
+                nodes: cleaned.nodes,
+                edges: cleaned.edges,
+              };
+            }
+
             setWorkflow(workflowData);
             // Store the Convex ID for future saves
             setConvexId(workflowData._convexId || workflowData._id || null);
@@ -237,12 +250,55 @@ export function useWorkflow(workflowId?: string) {
     }
   }, [workflow, loadWorkflows, createNewWorkflow]);
 
+  // Save workflow immediately (non-debounced) - used before execution
+  const saveWorkflowImmediate = useCallback(async (updates?: Partial<Workflow>) => {
+    if (!workflow) {
+      console.warn('⚠️ Cannot save workflow immediately: no workflow state');
+      return;
+    }
+
+    const updated: Workflow = {
+      ...workflow,
+      ...updates,
+      updatedAt: new Date().toISOString(),
+    };
+
+    setWorkflow(updated);
+
+    // Cancel any pending debounced saves
+    if (saveToConvexTimeoutRef.current) {
+      clearTimeout(saveToConvexTimeoutRef.current);
+      saveToConvexTimeoutRef.current = null;
+    }
+
+    // Save immediately without debounce
+    try {
+      const response = await fetch('/api/workflows', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updated),
+      });
+      const data = await response.json();
+      console.log('💾 [IMMEDIATE SAVE] Workflow saved to Convex:', data.success ? '✅ SUCCESS' : '❌ FAILED');
+
+      if (data.success && data.workflowId) {
+        setConvexId(data.workflowId);
+      }
+
+      return data.success;
+    } catch (error) {
+      console.error('❌ Failed to save workflow immediately:', error);
+      return false;
+    }
+  }, [workflow]);
+
   return {
     workflow,
     workflows,
     loading,
     convexId, // Expose Convex ID for templates and other features
     saveWorkflow,
+    saveWorkflowImmediate, // Non-debounced save for before execution
     updateNodes,
     updateEdges,
     updateNodeData,

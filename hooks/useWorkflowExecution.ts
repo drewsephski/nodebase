@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { Workflow, WorkflowExecution, NodeExecutionResult, WorkflowPendingAuth } from '@/lib/workflow/types';
+import { toast } from 'sonner';
 
 interface PendingArcadeResume {
   nodeId: string;
@@ -146,6 +147,33 @@ export function useWorkflowExecution() {
               const data = JSON.parse(line.slice(6));
 
               console.log(`📨 SSE Event: ${currentEvent}`, data);
+
+              // Handle error events
+              if (currentEvent === 'error' && data.error) {
+                console.error('❌ Workflow error:', data.error);
+
+                // Show error toast to user
+                toast.error('Workflow Error', {
+                  description: data.error,
+                  duration: 10000, // Show for 10 seconds
+                });
+
+                // Set failed execution state
+                setExecution({
+                  id: executionId || `exec_${Date.now()}`,
+                  workflowId: workflow.id,
+                  status: 'failed',
+                  error: data.error,
+                  nodeResults: nodeResults,
+                  startedAt: data.timestamp || new Date().toISOString(),
+                  completedAt: data.timestamp || new Date().toISOString(),
+                });
+
+                // Stop execution
+                setIsRunning(false);
+                setCurrentNodeId(null);
+                break; // Exit the SSE loop
+              }
 
               // Set current node immediately when node starts (before it completes)
               if (currentEvent === 'node_started' && data.nodeId) {

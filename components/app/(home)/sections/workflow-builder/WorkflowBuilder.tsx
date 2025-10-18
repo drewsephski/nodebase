@@ -62,6 +62,7 @@ import { getWorkflow } from "@/lib/workflow/storage";
 import type { WorkflowNode, WorkflowEdge } from "@/lib/workflow/types";
 import { nodeTypes } from "./CustomNodes";
 import { detectDuplicateCredentials } from "@/lib/workflow/duplicate-detection";
+import { cleanupInvalidEdges } from "@/lib/workflow/edge-cleanup";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 
@@ -284,7 +285,7 @@ function WorkflowBuilderInner({ onBack, initialWorkflowId, initialTemplateId }: 
   const { screenToFlowPosition, getNode, setCenter } = useReactFlow();
 
   // Workflow management
-  const { workflow, convexId, updateNodes, updateEdges, saveWorkflow, deleteWorkflow, createNewWorkflow } = useWorkflow(initialWorkflowId || undefined);
+  const { workflow, convexId, updateNodes, updateEdges, saveWorkflow, saveWorkflowImmediate, deleteWorkflow, createNewWorkflow } = useWorkflow(initialWorkflowId || undefined);
 
   // AUTO-SAVE DISABLED - Use manual Save button instead
   // Smart auto-save: only save when nodes/edges actually change, with debounce
@@ -484,8 +485,20 @@ function WorkflowBuilderInner({ onBack, initialWorkflowId, initialTemplateId }: 
       if (template) {
         console.log('Loading template from Convex:', template);
 
+        // Clean up any invalid edges in the template
+        const cleaned = cleanupInvalidEdges(template.nodes, template.edges);
+        const cleanedNodes = cleaned.nodes;
+        const cleanedEdges = cleaned.edges;
+
+        if (cleaned.removedCount > 0) {
+          console.warn(`🧹 Removed ${cleaned.removedCount} invalid edge(s) from template`);
+          toast.warning(`Template had ${cleaned.removedCount} invalid connection(s)`, {
+            description: 'These have been automatically removed',
+          });
+        }
+
         // Convert template nodes to React Flow format
-        const templateNodes = template.nodes.map((n: any) => {
+        const templateNodes = cleanedNodes.map((n: any) => {
           const nodeData = n.data as any;
           return {
             ...n,
@@ -499,9 +512,9 @@ function WorkflowBuilderInner({ onBack, initialWorkflowId, initialTemplateId }: 
         console.log('Template nodes with icons:', templateNodes.map(n => ({ id: n.id, label: n.data.label })));
 
         // Apply auto-layout for even spacing
-        const layoutedNodes = autoLayoutNodes(templateNodes as any, template.edges as any);
+        const layoutedNodes = autoLayoutNodes(templateNodes as any, cleanedEdges as any);
         setNodes(layoutedNodes as any);
-        setEdges(template.edges as any);
+        setEdges(cleanedEdges as any);
 
         // Reset node ID counter based on loaded nodes to prevent duplicates
         resetNodeIdCounter(layoutedNodes as any);
@@ -538,8 +551,20 @@ function WorkflowBuilderInner({ onBack, initialWorkflowId, initialTemplateId }: 
         nodes: workflow.nodes?.map((n: any) => ({ id: n.id, type: n.type }))
       });
 
+      // Clean up any invalid edges before rendering
+      const cleaned = cleanupInvalidEdges(workflow.nodes, workflow.edges);
+      const cleanedNodes = cleaned.nodes;
+      const cleanedEdges = cleaned.edges;
+
+      if (cleaned.removedCount > 0) {
+        console.warn(`🧹 Removed ${cleaned.removedCount} invalid edge(s) from workflow`);
+        toast.warning(`Workflow had ${cleaned.removedCount} invalid connection(s)`, {
+          description: 'These have been automatically removed',
+        });
+      }
+
       // Convert workflow nodes to React Flow format
-      const workflowNodes = workflow.nodes.map(n => {
+      const workflowNodes = cleanedNodes.map(n => {
         const nodeData = n.data as any;
         // Get the label text (not React element)
         const labelText = nodeData.nodeName || nodeData.label || n.type;
@@ -555,10 +580,10 @@ function WorkflowBuilderInner({ onBack, initialWorkflowId, initialTemplateId }: 
       });
 
       // Apply auto-layout for even spacing
-      const layoutedNodes = autoLayoutNodes(workflowNodes as any, workflow.edges as any);
+      const layoutedNodes = autoLayoutNodes(workflowNodes as any, cleanedEdges as any);
       console.log('Setting nodes to:', layoutedNodes.length, 'nodes');
       setNodes(layoutedNodes as any);
-      setEdges(workflow.edges as any);
+      setEdges(cleanedEdges as any);
 
       // Reset node ID counter based on loaded nodes to prevent duplicates
       resetNodeIdCounter(layoutedNodes as any);
@@ -1143,6 +1168,30 @@ function WorkflowBuilderInner({ onBack, initialWorkflowId, initialTemplateId }: 
 
     console.log('✅ Workflow exists:', workflow.name);
 
+    // Save the workflow before running to ensure it exists in Convex
+    console.log('💾 Saving workflow before execution...');
+    toast.info('Saving workflow...', { duration: 1000 });
+
+    const saveSuccess = await saveWorkflowImmediate({
+      nodes: nodes.map(n => ({
+        ...n,
+        type: n.type || 'default',
+        data: {
+          ...n.data,
+          label: typeof n.data.label === 'string' ? n.data.label : 'Node',
+          nodeType: n.data.nodeType || n.type,
+        },
+      })) as any,
+      edges: edges as any,
+    });
+
+    if (!saveSuccess) {
+      toast.error('Failed to save workflow', {
+        description: 'Cannot run workflow until it is saved',
+      });
+      return;
+    }
+
     // Create a fresh workflow object with current nodes/edges
     const currentWorkflow = {
       ...workflow,
@@ -1164,7 +1213,7 @@ function WorkflowBuilderInner({ onBack, initialWorkflowId, initialTemplateId }: 
 
     console.log('🏃 Running workflow with', currentWorkflow.nodes.length, 'nodes');
     await runWorkflow(currentWorkflow, input);
-  }, [workflow, nodes, edges, runWorkflow]);
+  }, [workflow, nodes, edges, runWorkflow, saveWorkflowImmediate]);
 
 
 
