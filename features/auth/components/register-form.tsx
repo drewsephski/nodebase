@@ -51,7 +51,14 @@ export function RegisterForm() {
                     router.push("/");
                 },
                 onError: (ctx) => {
-                    toast.error(ctx.error.message);
+                    // Handle specific Polar customer exists error
+                    if (ctx.error.message.includes("customer with this email address already exists")) {
+                        toast.error("This email is already registered with Polar. Please login instead.");
+                        // Optionally redirect to login
+                        router.push("/login");
+                    } else {
+                        toast.error(ctx.error.message);
+                    }
                 },
             }
         )
