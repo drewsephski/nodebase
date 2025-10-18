@@ -1,5 +1,3 @@
-
-
 generator client {
   provider = "prisma-client-js"
   output   = "../lib/generated/prisma"
@@ -10,27 +8,26 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model User {
-  id            String    @id
+  id            String     @id
   name          String
-  email         String
-  emailVerified Boolean   @default(false)
+  email         String     @unique
+  emailVerified Boolean    @default(false)
   image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @default(now()) @updatedAt
-  sessions      Session[]
-  accounts      Account[]
+  polarCustomerId String?   // Add this field
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @default(now()) @updatedAt
   workflows     Workflow[]
+  accounts      Account[]
+  sessions      Session[]
 
-  @@unique([email])
   @@map("user")
 }
 
 model Session {
   id        String   @id
   expiresAt DateTime
-  token     String
+  token     String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   ipAddress String?
@@ -38,7 +35,6 @@ model Session {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([token])
   @@map("session")
 }
 
@@ -47,7 +43,6 @@ model Account {
   accountId             String
   providerId            String
   userId                String
-  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   accessToken           String?
   refreshToken          String?
   idToken               String?
@@ -57,6 +52,7 @@ model Account {
   password              String?
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("account")
 }
@@ -73,12 +69,46 @@ model Verification {
 }
 
 model Workflow {
-  id        String   @id @default(cuid())
-  name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  userId String
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id          String       @id @default(cuid())
+  name        String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  userId      String
+  connections Connection[]
+  nodes       Node[]
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+model Node {
+  id                String       @id @default(cuid())
+  name              String
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  type              NodeType
+  position          Json
+  data              Json         @default("{}")
+  workflowId        String
+  outputConnections Connection[] @relation("FromNode")
+  inputConnections  Connection[] @relation("ToNode")
+  workflow          Workflow     @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+}
+
+model Connection {
+  id         String   @id @default(cuid())
+  workflow   String
+  fromNodeId String
+  toNodeId   String
+  fromOutput String   @default("main")
+  toInput    String   @default("main")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now()) @updatedAt
+  fromNode   Node     @relation("FromNode", fields: [fromNodeId], references: [id], onDelete: Cascade)
+  toNode     Node     @relation("ToNode", fields: [toNodeId], references: [id], onDelete: Cascade)
+  Workflow   Workflow @relation(fields: [workflow], references: [id], onDelete: Cascade)
+
+  @@unique([fromNodeId, fromOutput, toNodeId, toInput])
+}
+
+enum NodeType {
+  INITIAL
+}
