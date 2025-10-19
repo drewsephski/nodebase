@@ -6,6 +6,7 @@ import { ThemeProvider } from "next-themes";
 import { LightRays } from "@/components/ui/light-rays";
 import { Toaster } from "sonner";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
+import { Provider } from "jotai";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,6 +33,7 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-background`}>
         <TRPCReactProvider>
           <NuqsAdapter>
+            <Provider>
             <ThemeProvider attribute="class">
             <div className="fixed inset-0 -z-10 overflow-hidden">
               <LightRays className="h-full w-full" />
@@ -41,6 +43,7 @@ export default function RootLayout({
               <Toaster />
             </div>
           </ThemeProvider>
+          </Provider>
           </NuqsAdapter>
         </TRPCReactProvider>
       </body>
