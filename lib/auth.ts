@@ -36,6 +36,20 @@ function validateAuthEnvironment() {
     );
   }
 
+  // Validate social providers if any are configured
+  const socialProviders = [
+    { name: "GitHub", clientId: "GITHUB_CLIENT_ID", clientSecret: "GITHUB_CLIENT_SECRET" },
+    { name: "Google", clientId: "GOOGLE_CLIENT_ID", clientSecret: "GOOGLE_CLIENT_SECRET" },
+  ];
+
+  socialProviders.forEach(provider => {
+    if (process.env[provider.clientId] && !process.env[provider.clientSecret]) {
+      console.warn(`⚠️  ${provider.name} client ID is set but client secret is missing`);
+    } else if (process.env[provider.clientSecret] && !process.env[provider.clientId]) {
+      console.warn(`⚠️  ${provider.name} client secret is set but client ID is missing`);
+    }
+  });
+
   // Validate Polar configuration if Polar is enabled
   if (polarConfig.isConfigured) {
     console.log(`✅ Polar integration configured for ${polarConfig.environment} environment`);
@@ -54,6 +68,16 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     autoSignIn: true,
+  },
+  socialProviders: {
+    github: {
+      clientId: process.env.GITHUB_CLIENT_ID!,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+    },
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    },
   },
   plugins: polarConfig.isConfigured ? [
     polar({

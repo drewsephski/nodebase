@@ -47,6 +47,20 @@ export function LoginForm() {
         });
     };
 
+    const handleSocialLogin = async (provider: "github" | "google") => {
+        await authClient.signIn.social({
+            provider,
+            callbackURL: "/",
+        }, {
+            onSuccess: () => {
+                router.push("/");
+            },
+            onError: (ctx) => {
+                toast.error(ctx.error.message);
+            },
+        });
+    };
+
     const isPending = form.formState.isSubmitting;
 
     return (
@@ -65,6 +79,7 @@ export function LoginForm() {
                                         className="w-full cursor-pointer"
                                         type="button"
                                         disabled={isPending}
+                                        onClick={() => handleSocialLogin("github")}
                                     >
                                         <Image src="/logos/github.svg" alt="GitHub" width={22} height={22} />
                                         Continue with GitHub
@@ -73,6 +88,7 @@ export function LoginForm() {
                                         className="w-full cursor-pointer"
                                         type="button"
                                         disabled={isPending}
+                                        onClick={() => handleSocialLogin("google")}
                                     >
                                         <Image src="/logos/google.svg" alt="Google" width={20} height={20} />
                                         Continue with Google

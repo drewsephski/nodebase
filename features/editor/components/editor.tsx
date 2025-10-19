@@ -20,6 +20,8 @@ import type { Node, Edge } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { nodeComponents } from "@/config/node-components";
 import { AddNodeButton } from "./add-node-button";
+import { useSetAtom } from "jotai";
+import { editorAtom } from "@/features/editor/store/atoms";
 
 export const EditorLoading = () => {
   return <LoadingView message="Loading editor..." />;
@@ -31,6 +33,8 @@ export const EditorError = () => {
 
 export const Editor = ({ workflowId }: { workflowId: string }) => {
   const workflow = useSuspenseWorkflow(workflowId);
+
+  const setEditor = useSetAtom(editorAtom);
 
   const [nodes, setNodes] = useState<Node[]>(workflow.data.nodes);
   const [edges, setEdges] = useState<Edge[]>(workflow.data.edges);
@@ -64,6 +68,10 @@ export const Editor = ({ workflowId }: { workflowId: string }) => {
         proOptions={{
           hideAttribution: true,
         }}
+        onInit={setEditor}
+        snapGrid={[5, 5]}
+        snapToGrid
+        selectionOnDrag
       >
         <Background />
         <Controls />
