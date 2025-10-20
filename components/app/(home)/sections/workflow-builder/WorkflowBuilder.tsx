@@ -46,6 +46,7 @@ import DataNodePanel from "./DataNodePanel";
 import ToolsNodePanel from "./ToolsNodePanel";
 import NoteNodePanel from "./NoteNodePanel";
 import HTTPNodePanel from "./HTTPNodePanel";
+import ExtractNodePanel from "./ExtractNodePanel";
 import StartNodePanel from "./StartNodePanel";
 import WorkflowNameEditor from "./WorkflowNameEditor";
 import SettingsPanel from "./SettingsPanelSimple";
@@ -138,6 +139,8 @@ const nodeCategories = [
     category: "Data",
     nodes: [
       { type: "transform", label: "Transform", color: "bg-[#ECE3FF] dark:bg-[#9665FF]", icon: Braces },
+      { type: "extract", label: "Extract", color: "bg-[#ECE3FF] dark:bg-[#9665FF]", icon: Search },
+      { type: "http", label: "HTTP", color: "bg-[#ECE3FF] dark:bg-[#9665FF]", icon: Server },
       { type: "set-state", label: "Set state", color: "bg-[#ECE3FF] dark:bg-[#9665FF]", icon: Braces },
     ],
   },
@@ -1566,7 +1569,7 @@ function WorkflowBuilderInner({ onBack, initialWorkflowId, initialTemplateId }: 
           initial={{ x: -300, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="w-200 lg:w-200 md:w-180 sm:w-160 m-20 rounded-16 border border-border-faint bg-accent-white p-16 shadow-lg flex-shrink-0 z-10 self-start"
+          className="w-200 lg:w-200 md:w-180 sm:w-160 m-20 rounded-16 border border-border-faint bg-accent-white p-16 shadow-lg flex-shrink-0 z-10 self-start max-h-[calc(100vh-80px)] overflow-y-auto"
         >
         <div className="mb-24">
           <button
@@ -1721,6 +1724,22 @@ function WorkflowBuilderInner({ onBack, initialWorkflowId, initialTemplateId }: 
           />
         ) : (selectedNode?.data as any)?.nodeType?.includes('transform') ? (
           <DataNodePanel
+            node={selectedNode}
+            nodes={nodes}
+            onClose={() => setSelectedNode(null)}
+            onDelete={handleDeleteNode}
+            onUpdate={handleUpdateNodeData}
+          />
+        ) : (selectedNode?.data as any)?.nodeType === 'extract' ? (
+          <ExtractNodePanel
+            node={selectedNode}
+            nodes={nodes}
+            onClose={() => setSelectedNode(null)}
+            onDelete={handleDeleteNode}
+            onUpdate={handleUpdateNodeData}
+          />
+        ) : (selectedNode?.data as any)?.nodeType === 'http' ? (
+          <HTTPNodePanel
             node={selectedNode}
             nodes={nodes}
             onClose={() => setSelectedNode(null)}

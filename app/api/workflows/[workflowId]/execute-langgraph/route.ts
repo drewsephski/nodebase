@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { LangGraphExecutor } from '@/lib/workflow/langgraph';
 import { getWorkflow } from '@/lib/workflow/storage';
 import { getServerAPIKeys } from '@/lib/api/config';
+import { validateApiKey } from '@/lib/api/auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,6 +15,15 @@ export async function POST(
   { params }: { params: Promise<{ workflowId: string }> }
 ) {
   try {
+    // Validate API key
+    const authResult = await validateApiKey(request);
+    if (!authResult.authenticated) {
+      return NextResponse.json(
+        { error: authResult.error || 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
     const { workflowId } = await params;
     const body = await request.json();
     const { input, threadId } = body;
@@ -27,8 +37,17 @@ export async function POST(
       );
     }
 
-    // Get API keys
-    const apiKeys = getServerAPIKeys();
+    // Get API keys - check user keys first, then fall back to environment
+    const { getLLMApiKey } = await import('@/lib/api/llm-keys');
+    const userId = authResult.userId;
+    
+    const apiKeys = {
+      anthropic: userId ? await getLLMApiKey('anthropic', userId) : null || process.env.ANTHROPIC_API_KEY,
+      groq: userId ? await getLLMApiKey('groq', userId) : null || process.env.GROQ_API_KEY,
+      openai: userId ? await getLLMApiKey('openai', userId) : null || process.env.OPENAI_API_KEY,
+      firecrawl: process.env.FIRECRAWL_API_KEY, // Firecrawl keys are still environment-only for now
+      arcade: process.env.ARCADE_API_KEY,
+    };
 
     // Create LangGraph executor
     const executor = new LangGraphExecutor(workflow, undefined, apiKeys || undefined);
