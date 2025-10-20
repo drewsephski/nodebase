@@ -135,7 +135,7 @@ export default function HTTPNodePanel({ node, nodes, onClose, onDelete, onUpdate
                     value={url}
                     onChange={(e) => setUrl(e.target.value)}
                     placeholder="https://api.example.com/endpoint"
-                    className="w-full px-12 py-8 pr-80 bg-background-base border border-border-faint rounded-8 text-body-small text-accent-black font-mono focus:outline-none focus:border-heat-100 transition-colors"
+                    className="w-full px-12 py-8 pr-150 bg-background-base border border-border-faint rounded-8 text-body-small text-accent-black font-mono focus:outline-none focus:border-heat-100 transition-colors"
                   />
                   {nodes && (
                     <div className="absolute right-8 top-1/2 -translate-y-1/2">
