@@ -14,6 +14,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ShimmerButton } from "@/components/ui/shimmer-button";
 import { authClient } from "@/lib/auth-client";
+import { useMigrateGuestWorkflows } from "@/features/workflows/hooks/use-guest-workflows";
+import { getGuestWorkflows } from "@/lib/guest-workflow-storage";
 
 const registerSchema = z.object({
     email: z.email("Please enter a valid email address"),
@@ -29,6 +31,7 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export function RegisterForm() {
     const router = useRouter();
+    const migrateGuestWorkflows = useMigrateGuestWorkflows();
     const form = useForm<RegisterFormValues>({
         resolver: zodResolver(registerSchema),
         defaultValues: {
@@ -44,11 +47,21 @@ export function RegisterForm() {
                 email: values.email,
                 password: values.password,
                 name: values.email,
-                callbackURL: "/",
+                callbackURL: "/workflows",
             },
             {
-                onSuccess: () => {
-                    router.push("/");
+                onSuccess: async () => {
+                    const guestWorkflows = getGuestWorkflows();
+                    if (guestWorkflows.length > 0) {
+                        toast.info("Migrating your workflows...");
+                        try {
+                            await migrateGuestWorkflows.mutateAsync();
+                            toast.success(`${guestWorkflows.length} workflows migrated successfully!`);
+                        } catch (error) {
+                            toast.error("Failed to migrate workflows. You can try again later.");
+                        }
+                    }
+                    router.push("/workflows");
                 },
                 onError: (ctx) => {
                     // Handle specific Polar customer exists error
@@ -67,10 +80,20 @@ export function RegisterForm() {
     const handleSocialLogin = async (provider: "github" | "google") => {
         await authClient.signIn.social({
             provider,
-            callbackURL: "/",
+            callbackURL: "/workflows",
         }, {
-            onSuccess: () => {
-                router.push("/");
+            onSuccess: async () => {
+                const guestWorkflows = getGuestWorkflows();
+                if (guestWorkflows.length > 0) {
+                    toast.info("Migrating your workflows...");
+                    try {
+                        await migrateGuestWorkflows.mutateAsync();
+                        toast.success(`${guestWorkflows.length} workflows migrated successfully!`);
+                    } catch (error) {
+                        toast.error("Failed to migrate workflows. You can try again later.");
+                    }
+                }
+                router.push("/workflows");
             },
             onError: (ctx) => {
                 toast.error(ctx.error.message);

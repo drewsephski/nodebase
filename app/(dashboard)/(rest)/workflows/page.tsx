@@ -1,5 +1,5 @@
 import { prefetchWorkflows, prefetchWorkflow } from "@/features/workflows/server/prefetch";
-import { requireAuth } from "@/lib/auth-utils";
+import { getAuth } from "@/lib/auth-utils";
 import { HydrateClient } from "@/trpc/server";
 import {
   WorkflowsContainer,
@@ -17,9 +17,10 @@ type Props = {
 };
 
 const Page = async ({ searchParams }: Props) => {
-  await requireAuth();
-
+  const session = await getAuth();
   const params = await workflowsParamsLoader(searchParams);
+  
+  // Always prefetch workflows (for both authenticated and unauthenticated users)
   prefetchWorkflows(params);
 
   return (

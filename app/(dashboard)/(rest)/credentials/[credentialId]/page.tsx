@@ -1,4 +1,4 @@
-import { requireAuth } from "@/lib/auth-utils";
+import { getAuth } from "@/lib/auth-utils";
 
 interface PageProps {
   params: Promise<{ credentialId: string }>;
@@ -7,9 +7,10 @@ interface PageProps {
 // http://localhost:3000/credentials/123
 
 const Page = async ({ params }: PageProps) => {
-    await requireAuth();
+  const session = await getAuth();
   const { credentialId } = await params;
 
+  // If user is not authenticated, still show the page but they won't be able to perform actions
   return <p>Credential id: {credentialId}</p>;
 }
 

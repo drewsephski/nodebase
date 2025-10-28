@@ -44,6 +44,7 @@ type EntityHeaderProps = {
   newButtonLabel: string;
   disabled?: boolean;
   isCreating?: boolean;
+  extraActions?: React.ReactNode;
 } & (
   | { onNew: () => void; newButtonHref?: never }
   | { newButtonHref: string; onNew?: never }
@@ -56,6 +57,7 @@ export const EntityHeader = ({
   newButtonLabel,
   disabled,
   isCreating,
+  extraActions,
   onNew,
   newButtonHref,
 }: EntityHeaderProps) => {
@@ -69,20 +71,23 @@ export const EntityHeader = ({
           </p>
         )}
       </div>
-      {onNew && !newButtonHref && (
-        <Button disabled={isCreating || disabled} size="sm" onClick={onNew}>
-          <PlusIcon className="size-4" />
-          {newButtonLabel}
-        </Button>
-      )}
-      {newButtonHref && !onNew && (
-        <Button size="sm" asChild>
-          <Link href={newButtonHref} prefetch>
+      <div className="flex items-center gap-2">
+        {extraActions}
+        {onNew && !newButtonHref && (
+          <Button disabled={isCreating || disabled} size="sm" onClick={onNew}>
             <PlusIcon className="size-4" />
             {newButtonLabel}
-          </Link>
-        </Button>
-      )}
+          </Button>
+        )}
+        {newButtonHref && !onNew && (
+          <Button size="sm" asChild>
+            <Link href={newButtonHref} prefetch>
+              <PlusIcon className="size-4" />
+              {newButtonLabel}
+            </Link>
+          </Button>
+        )}
+      </div>
     </div>
   );
 };
@@ -307,11 +312,11 @@ export const EntityItem = ({
     <Link href={href || "#"} prefetch>
       <Card
         className={cn(
-          "h-full p-4 sm:p-6 shadow-sm hover:shadow-md cursor-pointer transition-shadow duration-200 border-border/50",
+          "p-4 sm:p-6 shadow-sm hover:shadow-2xl cursor-pointer transition-shadow duration-200 border-border/50",
           isRemoving && "opacity-50 cursor-not-allowed"
         )}
       >
-        <CardContent className="flex flex-col h-full p-0">
+        <CardContent className="flex flex-col p-0">
           <div className="flex items-start gap-4 flex-1">
             {image && (
               <div className="flex-shrink-0">

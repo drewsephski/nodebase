@@ -14,6 +14,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ShimmerButton } from "@/components/ui/shimmer-button";
 import { authClient } from "@/lib/auth-client";
+import { useMigrateGuestWorkflows } from "@/features/workflows/hooks/use-guest-workflows";
+import { getGuestWorkflows } from "@/lib/guest-workflow-storage";
 
 const loginSchema = z.object({
     email: z.email("Please enter a valid email address"),
@@ -24,6 +26,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export function LoginForm() {
     const router = useRouter();
+    const migrateMutation = useMigrateGuestWorkflows();
     const form = useForm<LoginFormValues>({
         resolver: zodResolver(loginSchema),
         defaultValues: {
@@ -36,10 +39,18 @@ export function LoginForm() {
         await authClient.signIn.email({
             email: values.email,
             password: values.password,
-            callbackURL: "/",
+            callbackURL: "/workflows",
         }, {
-            onSuccess: () => {
-                router.push("/");
+            onSuccess: async () => {
+                const guestWorkflows = getGuestWorkflows();
+                if (guestWorkflows.length > 0) {
+                    try {
+                        await migrateMutation.mutateAsync();
+                    } catch (error) {
+                        console.error("Failed to migrate guest workflows:", error);
+                    }
+                }
+                router.push("/workflows");
             },
             onError: (ctx) => {
                 toast.error(ctx.error.message);
@@ -50,10 +61,18 @@ export function LoginForm() {
     const handleSocialLogin = async (provider: "github" | "google") => {
         await authClient.signIn.social({
             provider,
-            callbackURL: "/",
+            callbackURL: "/workflows",
         }, {
-            onSuccess: () => {
-                router.push("/");
+            onSuccess: async () => {
+                const guestWorkflows = getGuestWorkflows();
+                if (guestWorkflows.length > 0) {
+                    try {
+                        await migrateMutation.mutateAsync();
+                    } catch (error) {
+                        console.error("Failed to migrate guest workflows:", error);
+                    }
+                }
+                router.push("/workflows");
             },
             onError: (ctx) => {
                 toast.error(ctx.error.message);

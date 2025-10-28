@@ -7,5 +7,8 @@ export const prefetchWorkflows = (params: Input) => {
     return prefetch(trpc.workflows.getMany.queryOptions(params));
 }
 export const prefetchWorkflow = (id: string) => {
+    if (id.startsWith("guest-") || id === "new") {
+        return;
+    }
     return prefetch(trpc.workflows.getOne.queryOptions({ id }));
 }
