@@ -12,6 +12,13 @@ export const requireAuth = async () => {
     return session;
     };
 
+export const getAuth = async () => {
+    const session = await auth.api.getSession({
+        headers: await headers(),
+    });
+    return session;
+};
+
 export const requireUnauth = async () => {
     const session = await auth.api.getSession({
         headers: await headers(),
@@ -20,4 +27,4 @@ export const requireUnauth = async () => {
         redirect("/");
     }
     return session;
-    };
+};

@@ -1,4 +1,4 @@
-import { createTRPCRouter } from "@/trpc/init";
+import { createTRPCRouter, baseProcedure } from "@/trpc/init";
 import { protectedProcedure } from "@/trpc/init";
 import { generateSlug } from "random-word-slugs";
 import { z } from "zod";
@@ -7,6 +7,9 @@ import { PAGINATION } from "@/config/constants";
 import { Node, Edge } from "@xyflow/react";
 import { Prisma } from "@/lib/generated/prisma";
 import { NodeType } from "@/lib/generated/prisma";
+import { ExecutionEngine } from "@/lib/execution-engine";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
 export const workFlowRouter = createTRPCRouter({
   create: protectedProcedure.mutation(({ ctx }) => {
@@ -131,42 +134,42 @@ export const workFlowRouter = createTRPCRouter({
         },
       });
 
-      return prisma.workflow.update({
-        where: {
-          userId: ctx.auth.user.id,
-          id: input.id,
-        },
-        data: {
-          nodes: {
-            deleteMany: {
-              workflowId: input.id,
-            },
-            createMany: {
-              data: nodes.map((node) => ({
-                id: node.id,
-                type: node.type as NodeType,
-                position: node.position,
-                data: node.data || {},
-                name: node.type || "",
-                workflowId: id,
-              })),
-            },
+      return await prisma.$transaction(async (tx) => {
+        await tx.node.deleteMany({
+          where: {
+            workflowId: id,
           },
-          connections: {
-            deleteMany: {
-              workflow: input.id,
-            },
-            createMany: {
-              data: edges.map((edge) => ({
-                workflow: id,
-                fromNodeId: edge.source,
-                toNodeId: edge.target,
-                fromOutput: edge.sourceHandle || "main",
-                toInput: edge.targetHandle || "main",
-              })),
-            },
+        });
+        await tx.node.createMany({
+          data: nodes.map((node) => ({
+            id: node.id,
+            type: node.type as NodeType,
+            position: node.position,
+            data: node.data || {},
+            name: node.type || "",
+            workflowId: id,
+          })),
+        });
+
+        await tx.connection.deleteMany({
+          where: {
+            workflow: id,
           },
-        },
+        });
+        await tx.connection.createMany({
+          data: edges.map((edge) => ({
+            workflow: id,
+            fromNodeId: edge.source,
+            toNodeId: edge.target,
+            fromOutput: edge.sourceHandle || "main",
+            toInput: edge.targetHandle || "main",
+          })),
+        });
+
+        return await tx.workflow.update({
+          where: { id },
+          data: { updatedAt: new Date() },
+        });
       });
     }),
 
@@ -207,7 +210,7 @@ export const workFlowRouter = createTRPCRouter({
       };
     }),
 
-  getMany: protectedProcedure
+  getMany: baseProcedure
     .input(
       z.object({
         page: z.number().default(PAGINATION.DEFAULT_PAGE),
@@ -219,14 +222,33 @@ export const workFlowRouter = createTRPCRouter({
         search: z.string().default(""),
       })
     )
-    .query(async ({ ctx, input }) => {
-      const { page, pageSize, search } = input;
+    .query(async (opts) => {
+      const { page, pageSize, search } = opts.input;
+      
+      // Get fresh session from auth
+      const session = await auth.api.getSession({
+        headers: await headers(),
+      });
+      
+      // If user is not authenticated, return empty list
+      if (!session?.user) {
+        return {
+          items: [],
+          page: 1,
+          pageSize,
+          totalCount: 0,
+          totalPages: 0,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        };
+      }
+
       const [items, totalCount] = await Promise.all([
         prisma.workflow.findMany({
           skip: (page - 1) * pageSize,
           take: pageSize,
           where: {
-            userId: ctx.auth.user.id,
+            userId: session.user.id,
             name: {
               contains: search,
               mode: "insensitive",
@@ -238,8 +260,7 @@ export const workFlowRouter = createTRPCRouter({
         }),
         prisma.workflow.count({
           where: {
-            userId: ctx.auth.user.id,
-
+            userId: session.user.id,
             name: {
               contains: search,
               mode: "insensitive",
@@ -261,5 +282,162 @@ export const workFlowRouter = createTRPCRouter({
         hasNextPage,
         hasPreviousPage,
       };
+    }),
+  execute: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const { id } = input;
+
+      try {
+        console.log("DATABASE_URL available:", !!process.env.DATABASE_URL);
+        console.log("DATABASE_URL length:", process.env.DATABASE_URL?.length || 0);
+
+        // Verify workflow ownership
+        const workflow = await prisma.workflow.findUnique({
+          where: {
+            id,
+            userId: ctx.auth.user.id,
+          },
+        });
+
+        if (!workflow) {
+          throw new Error("Workflow not found");
+        }
+
+        // Check if prisma client is available
+        if (!prisma) {
+          throw new Error("Database connection not available");
+        }
+
+        // Create execution engine and run workflow
+        const engine = await ExecutionEngine.createExecution(id, ctx.auth.user.id, "manual", prisma);
+        await engine.executeWorkflow();
+
+        return { success: true };
+      } catch (error) {
+        console.error("Workflow execution error:", error);
+        throw error;
+      }
+    }),
+
+  getExecutions: protectedProcedure
+    .input(
+      z.object({
+        workflowId: z.string(),
+        page: z.number().default(PAGINATION.DEFAULT_PAGE),
+        pageSize: z
+          .number()
+          .min(PAGINATION.MIN_PAGE_SIZE)
+          .max(PAGINATION.MAX_PAGE_SIZE)
+          .default(PAGINATION.DEFAULT_PAGE_SIZE),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const { workflowId, page, pageSize } = input;
+
+      // Verify workflow ownership
+      const workflow = await prisma.workflow.findUnique({
+        where: {
+          id: workflowId,
+          userId: ctx.auth.user.id,
+        },
+      });
+
+      if (!workflow) {
+        throw new Error("Workflow not found");
+      }
+
+      const [executions, totalCount] = await Promise.all([
+        prisma.execution.findMany({
+          where: { workflowId },
+          skip: (page - 1) * pageSize,
+          take: pageSize,
+          orderBy: { createdAt: "desc" },
+          include: {
+            steps: true,
+            logs: {
+              orderBy: { createdAt: "asc" },
+              take: 10, // Limit logs for performance
+            },
+          },
+        }),
+        prisma.execution.count({
+          where: { workflowId },
+        }),
+      ]);
+
+      const totalPages = Math.ceil(totalCount / pageSize);
+      const hasNextPage = page < totalPages;
+      const hasPreviousPage = page > 1;
+
+      return {
+        executions,
+        page,
+        pageSize,
+        totalCount,
+        totalPages,
+        hasNextPage,
+        hasPreviousPage,
+      };
+    }),
+
+  triggerWebhook: protectedProcedure
+    .input(z.object({ id: z.string(), data: z.record(z.string(), z.unknown()).optional() }))
+    .mutation(async ({ ctx, input }) => {
+      const { id, data } = input;
+
+      // Verify workflow ownership
+      const workflow = await prisma.workflow.findUnique({
+        where: {
+          id,
+          userId: ctx.auth.user.id,
+        },
+      });
+
+      if (!workflow) {
+        throw new Error("Workflow not found");
+      }
+
+      // Enqueue the webhook execution
+      const { ExecutionQueue } = await import("@/lib/execution-queue");
+      const queue = new ExecutionQueue(prisma);
+      const jobId = await queue.enqueueJob({
+        workflowId: id,
+        userId: ctx.auth.user.id,
+        triggerType: "webhook",
+        webhookData: data,
+      });
+
+      return { jobId, message: "Workflow execution queued via webhook" };
+    }),
+
+  triggerSchedule: protectedProcedure
+    .input(z.object({ id: z.string(), scheduledAt: z.date() }))
+    .mutation(async ({ ctx, input }) => {
+      const { id, scheduledAt } = input;
+
+      // Verify workflow ownership
+      const workflow = await prisma.workflow.findUnique({
+        where: {
+          id,
+          userId: ctx.auth.user.id,
+        },
+      });
+
+      if (!workflow) {
+        throw new Error("Workflow not found");
+      }
+
+      // Enqueue the scheduled execution
+      const { ExecutionQueue } = await import("@/lib/execution-queue");
+      const queue = new ExecutionQueue(prisma);
+      const jobId = await queue.enqueueJob({
+        workflowId: id,
+        userId: ctx.auth.user.id,
+        triggerType: "schedule",
+        scheduledAt,
+      });
+
+      return { jobId, message: "Workflow execution scheduled" };
     }),
 });

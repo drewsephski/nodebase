@@ -20,8 +20,33 @@ model User {
   workflows     Workflow[]
   accounts      Account[]
   sessions      Session[]
+  credentials   Credential[]
 
   @@map("user")
+}
+
+model Credential {
+  id          String        @id @default(cuid())
+  name        String
+  type        CredentialType
+  data        Json
+  description String?
+  userId      String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("credential")
+}
+
+enum CredentialType {
+  API_KEY
+  DATABASE
+  OAUTH2
+  BASIC_AUTH
+  BEARER_TOKEN
+  CUSTOM
 }
 
 model Session {
@@ -76,6 +101,8 @@ model Workflow {
   userId      String
   connections Connection[]
   nodes       Node[]
+  executions  Execution[]
+  jobs        ExecutionJob[]
   user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
@@ -109,8 +136,135 @@ model Connection {
   @@unique([fromNodeId, fromOutput, toNodeId, toInput])
 }
 
+model Execution {
+  id          String   @id @default(cuid())
+  workflowId  String
+  status      ExecutionStatus @default(PENDING)
+  startedAt   DateTime?
+  completedAt DateTime?
+  error       String?
+  triggeredBy String?  // user ID or "webhook" or "schedule"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workflow      Workflow       @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  steps         ExecutionStep[]
+  logs          ExecutionLog[]
+
+  @@map("execution")
+}
+
+model ExecutionStep {
+  id          String   @id @default(cuid())
+  executionId String
+  nodeId      String
+  status      StepStatus @default(PENDING)
+  startedAt   DateTime?
+  completedAt DateTime?
+  error       String?
+  input       Json?    // Input data for this step
+  output      Json?    // Output data from this step
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  execution Execution @relation(fields: [executionId], references: [id], onDelete: Cascade)
+
+  @@map("execution_step")
+}
+
+model ExecutionLog {
+  id          String   @id @default(cuid())
+  executionId String
+  level       LogLevel @default(INFO)
+  message     String
+  nodeId      String?  // Which node generated this log
+  data        Json?    // Additional structured data
+  createdAt   DateTime @default(now())
+
+  execution Execution @relation(fields: [executionId], references: [id], onDelete: Cascade)
+
+  @@map("execution_log")
+}
+
+enum LogLevel {
+  INFO
+  WARN
+  ERROR
+}
+
 enum NodeType {
   INITIAL
   MANUAL_TRIGGER
   HTTP_REQUEST
+
+  // Triggers (3 new)
+  WEBHOOK_TRIGGER
+  SCHEDULE_TRIGGER
+
+  // Communication (4 new)
+  SLACK_SEND_MESSAGE
+  DISCORD_SEND_MESSAGE
+  EMAIL_SEND
+  TELEGRAM_SEND_MESSAGE
+
+  // AI Services (3 new)
+  OPENAI_CHAT
+  ANTHROPIC_CHAT
+  GOOGLE_GEMINI_CHAT
+
+  // Data Operations (4 new)
+  JSON_PARSE
+  FILTER
+  SET_VARIABLE
+  CODE_EXECUTE
+
+  // Database (2 new)
+  POSTGRES_QUERY
+  MONGODB_QUERY
+
+  // Utilities (3 new)
+  DELAY
+  IF_CONDITION
+  MERGE
+}
+
+enum ExecutionStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum StepStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  SKIPPED
+}
+
+model ExecutionJob {
+  id          String   @id @default(cuid())
+  workflowId  String
+  userId      String
+  triggerType String   // "webhook" or "schedule"
+  status      JobStatus @default(PENDING)
+  scheduledAt DateTime?
+  webhookData Json?
+  error       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  completedAt DateTime?
+
+  workflow Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+
+  @@map("execution_job")
+}
+
+enum JobStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
 }

@@ -15,7 +15,6 @@ import { authClient } from "@/lib/auth-client";
 interface UpgradeModalProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    onClose: () => void;
 }
 
 export const UpgradeModal = ({ open, onOpenChange }: UpgradeModalProps) => {

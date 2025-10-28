@@ -1,35 +1,32 @@
-import { requireAuth } from "@/lib/auth-utils";
+import { getAuth } from "@/lib/auth-utils";
 import { prefetchWorkflow } from "@/features/workflows/server/prefetch";
-import { ErrorBoundary } from "react-error-boundary";
-import { Suspense } from "react";
 import { HydrateClient } from "@/trpc/server";
-import { Editor } from "@/features/editor/components/editor";
-import {
-  EditorError,
-  EditorLoading,
-} from "@/features/editor/components/editor";
 import { EditorHeader } from "@/features/editor/components/editor-header";
+import { EditorClient } from "@/features/editor/components/editor-client";
 
 interface PageProps {
-  params: Promise<{ workflowId: string }>;
+  params: { workflowId: string };
 }
 
 const Page = async ({ params }: PageProps) => {
-  await requireAuth();
-
-  const { workflowId } = await params;
-  prefetchWorkflow(workflowId);
+  const session = await getAuth();
+  const { workflowId } = params;
+  
+  // Only prefetch workflow if it's not a guest workflow or "new"
+  if (!workflowId.startsWith("guest-") && workflowId !== "new") {
+    try {
+      await prefetchWorkflow(workflowId);
+    } catch (error) {
+      console.error(`Failed to prefetch workflow ${workflowId}:`, error);
+    }
+  }
 
   return (
     <HydrateClient>
-      <ErrorBoundary fallback={<EditorError />}>
-        <Suspense fallback={<EditorLoading />}>
-          <EditorHeader workflowId={workflowId} />
-          <main className="flex-1">
-            <Editor workflowId={workflowId} />
-          </main>
-        </Suspense>
-      </ErrorBoundary>
+      <EditorHeader workflowId={workflowId} />
+      <main className="flex-1">
+        <EditorClient workflowId={workflowId} isAuthenticated={!!session} />
+      </main>
     </HydrateClient>
   );
 };

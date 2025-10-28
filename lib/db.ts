@@ -6,6 +6,7 @@ const globalForPrisma = global as unknown as {
 
 const prisma = globalForPrisma.prisma || new PrismaClient();
 
+// Ensure connection is established
 if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma;
 }
