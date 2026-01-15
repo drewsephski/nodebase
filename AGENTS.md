@@ -5,6 +5,7 @@
 **N8N Clone** - A modern, full-stack workflow automation platform built with Next.js 15, inspired by n8n. This application allows users to create, manage, and execute automated workflows by connecting various services and APIs together.
 
 ### Core Architecture
+
 - **Frontend**: Next.js 15 with App Router, React 19, TypeScript
 - **Backend**: tRPC for type-safe APIs, Next.js API routes
 - **Database**: PostgreSQL with Prisma ORM
@@ -16,27 +17,34 @@
 ## Setup and Development
 
 ### Prerequisites
+
 - Node.js 18+
 - PostgreSQL database
 - Bun package manager
 
 ### Initial Setup Steps
+
 1. **Clone and navigate to project**
+
    ```bash
    git clone <repository-url>
    cd n8n
    ```
 
 2. **Install dependencies**
+
    ```bash
    bun install
    ```
 
 3. **Environment configuration**
+
    ```bash
    cp .env.example .env.local
    ```
+
    Configure the following in `.env.local`:
+
    ```env
    DATABASE_URL="postgresql://username:password@localhost:5432/n8n_db"
    BETTER_AUTH_SECRET="your-secret-key"
@@ -45,18 +53,22 @@
    ```
 
 4. **Database setup**
+
    ```bash
    bunx prisma generate
    bunx prisma db push
    ```
 
 5. **Start development server**
+
    ```bash
    bun run dev
    ```
+
    Application will be available at `http://localhost:3000`
 
 ### Alternative Development Setup
+
 ```bash
 # Run all services (app + inngest)
 bun run dev:all
@@ -68,6 +80,7 @@ bun run inngest:dev
 ## Build and Deployment
 
 ### Build Commands
+
 ```bash
 # Production build
 bun run build
@@ -80,6 +93,7 @@ bun run lint
 ```
 
 ### Deployment Configuration
+
 - **Framework**: Next.js 15 with Turbopack
 - **Database**: Prisma with PostgreSQL
 - **Authentication**: Better Auth
@@ -88,12 +102,14 @@ bun run lint
 ## Code Style and Standards
 
 ### TypeScript Configuration
+
 - **Target**: ES2017
 - **Strict Mode**: Enabled
 - **Path Mapping**: `@/*` → `./*`
 - **File Extensions**: `.ts`, `.tsx`
 
 ### ESLint Rules
+
 - Extends: `next/core-web-vitals`, `next/typescript`
 - **Ignored Directories**:
   - `node_modules/**`
@@ -103,6 +119,7 @@ bun run lint
   - `next-env.d.ts`
 
 ### Code Organization
+
 ```
 src/
 ├── app/                    # Next.js App Router
@@ -121,6 +138,7 @@ src/
 ```
 
 ### Import Aliases
+
 ```typescript
 // Components
 import { Button } from "@/components/ui/button"
@@ -135,11 +153,13 @@ import type { RouterOutputs } from "@/trpc/shared"
 ## Database and API Guidelines
 
 ### Prisma Schema Management
+
 - Models defined in `prisma/schema.prisma`
 - Generate client: `bunx prisma generate`
 - Apply migrations: `bunx prisma db push`
 
 ### tRPC API Structure
+
 ```typescript
 // Router definition
 export const workflowRouter = createTRPCRouter({
@@ -160,6 +180,7 @@ export const workflowRouter = createTRPCRouter({
 ```
 
 ### API Route Protection
+
 - Use `protectedProcedure` for authenticated routes
 - Access user context via `ctx.auth.user`
 - Validate inputs with Zod schemas
@@ -167,12 +188,14 @@ export const workflowRouter = createTRPCRouter({
 ## Component Development
 
 ### UI Component Library
+
 - **Base**: Radix UI primitives
 - **Styling**: TailwindCSS with shadcn/ui
 - **Icons**: Lucide React
 - **Theme**: next-themes for dark/light mode
 
 ### Component Structure
+
 ```typescript
 // components/ui/button.tsx
 import * as React from "react"
@@ -225,6 +248,7 @@ export { Button, buttonVariants }
 ## Testing Strategy
 
 ### Testing Commands
+
 ```bash
 # Run test suite (when implemented)
 bun run test
@@ -234,6 +258,7 @@ bun run test components/button.test.tsx
 ```
 
 ### Testing Guidelines
+
 - Unit tests for utilities and hooks
 - Integration tests for API routes
 - Component tests for UI interactions
@@ -242,6 +267,7 @@ bun run test components/button.test.tsx
 ## Git and Collaboration
 
 ### Commit Message Format
+
 ```
 <type>(<scope>): <description>
 
@@ -251,6 +277,7 @@ bun run test components/button.test.tsx
 ```
 
 **Types:**
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation changes
@@ -260,6 +287,7 @@ bun run test components/button.test.tsx
 - `chore`: Maintenance tasks
 
 ### Pull Request Process
+
 1. Create feature branch from `main`
 2. Make changes following code standards
 3. Add tests for new functionality
@@ -268,6 +296,7 @@ bun run test components/button.test.tsx
 6. Request review from maintainers
 
 ### Branch Naming Convention
+
 ```
 feature/add-workflow-templates
 fix/authentication-bug
@@ -277,16 +306,19 @@ refactor/api-optimization
 ## Security Guidelines
 
 ### Authentication
+
 - Use `protectedProcedure` for all authenticated routes
 - Validate all user inputs with Zod schemas
 - Implement proper session management with Better Auth
 
 ### Database Security
+
 - Never expose raw database URLs in client code
 - Use Prisma's type-safe query builder
 - Implement proper input sanitization
 
 ### API Security
+
 - Validate all API inputs
 - Implement rate limiting on sensitive endpoints
 - Use HTTPS in production
@@ -294,6 +326,7 @@ refactor/api-optimization
 ## Dependency Management
 
 ### Adding New Dependencies
+
 ```bash
 # Production dependencies
 bun add package-name
@@ -306,12 +339,14 @@ bun install
 ```
 
 ### Dependency Guidelines
+
 - **Frontend**: React ecosystem libraries
 - **Backend**: Node.js compatible packages
 - **UI**: Radix UI, TailwindCSS ecosystem
 - **Development**: ESLint, TypeScript, testing frameworks
 
 ### Version Management
+
 - Use specific versions in `package.json`
 - Regularly update dependencies for security
 - Test thoroughly after major version updates
@@ -319,12 +354,14 @@ bun install
 ## Performance Considerations
 
 ### Optimization Techniques
+
 - Use React Server Components for static content
 - Implement proper loading states with React Query
 - Optimize images with Next.js Image component
 - Minimize client-side JavaScript bundle
 
 ### Monitoring
+
 - Sentry integration for error tracking
 - Performance monitoring in production
 - Database query optimization
@@ -334,6 +371,7 @@ bun install
 ### Common Issues
 
 **Build Errors:**
+
 ```bash
 # Clear Next.js cache
 rm -rf .next
@@ -347,6 +385,7 @@ bun install
 ```
 
 **Database Issues:**
+
 ```bash
 # Reset database
 bunx prisma db push --force-reset
@@ -356,6 +395,7 @@ bunx prisma studio
 ```
 
 **Type Errors:**
+
 ```bash
 # Regenerate types
 bunx prisma generate
@@ -365,6 +405,7 @@ bunx tsc --noEmit
 ## Additional Resources
 
 ### Documentation
+
 - [Next.js Documentation](https://nextjs.org/docs)
 - [tRPC Documentation](https://trpc.io/docs)
 - [Prisma Documentation](https://www.prisma.io/docs)
@@ -372,6 +413,7 @@ bunx tsc --noEmit
 - [shadcn/ui Documentation](https://ui.shadcn.com/)
 
 ### Community
+
 - GitHub Issues for bug reports
 - Discussions for feature requests
 - Discord/Server for real-time support

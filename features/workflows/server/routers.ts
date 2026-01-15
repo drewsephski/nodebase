@@ -7,8 +7,29 @@ import { PAGINATION } from "@/config/constants";
 import { Node, Edge } from "@xyflow/react";
 import { Prisma } from "@/lib/generated/prisma";
 import { NodeType } from "@/lib/generated/prisma";
+import { inngest } from "@/inngest";
 
 export const workFlowRouter = createTRPCRouter({
+  execute: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async({ ctx, input }) => {
+      const workflow = await prisma.workflow.findUniqueOrThrow({
+        where: {
+          id: input.id,
+          userId: ctx.auth.user.id,
+        },
+      });
+
+      await inngest.send({
+        name: "workflows/execute.workflow",
+        data: {
+          workflowId: input.id,
+        },
+      });
+
+      return workflow;
+      // TODO: Execute workflow
+  }),
   create: protectedProcedure.mutation(({ ctx }) => {
     return prisma.workflow.create({
       data: {
@@ -26,13 +47,25 @@ export const workFlowRouter = createTRPCRouter({
   }),
   remove: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .mutation(({ ctx, input }) => {
-      return prisma.workflow.delete({
+    .mutation(async ({ ctx, input }) => {
+      const workflow = await prisma.workflow.findFirst({
         where: {
           userId: ctx.auth.user.id,
           id: input.id,
         },
       });
+
+      if (!workflow) {
+        return { success: false, message: "Workflow not found" };
+      }
+
+      await prisma.workflow.delete({
+        where: {
+          id: input.id,
+        },
+      });
+
+      return { success: true, message: "Workflow deleted successfully" };
     }),
 
   updateNodes: protectedProcedure
@@ -131,42 +164,59 @@ export const workFlowRouter = createTRPCRouter({
         },
       });
 
-      return prisma.workflow.update({
-        where: {
-          userId: ctx.auth.user.id,
-          id: input.id,
-        },
-        data: {
-          nodes: {
-            deleteMany: {
-              workflowId: input.id,
-            },
-            createMany: {
-              data: nodes.map((node) => ({
-                id: node.id,
-                type: node.type as NodeType,
-                position: node.position,
-                data: node.data || {},
-                name: node.type || "",
-                workflowId: id,
-              })),
-            },
+      // Use a transaction to ensure atomicity
+      return await prisma.$transaction(async (tx) => {
+        // Delete existing nodes and connections
+        await tx.node.deleteMany({
+          where: {
+            workflowId: id,
           },
-          connections: {
-            deleteMany: {
-              workflow: input.id,
-            },
-            createMany: {
-              data: edges.map((edge) => ({
-                workflow: id,
-                fromNodeId: edge.source,
-                toNodeId: edge.target,
-                fromOutput: edge.sourceHandle || "main",
-                toInput: edge.targetHandle || "main",
-              })),
-            },
+        });
+
+        await tx.connection.deleteMany({
+          where: {
+            workflow: id,
           },
-        },
+        });
+
+        // Create new nodes
+        if (nodes.length > 0) {
+          await tx.node.createMany({
+            data: nodes.map((node) => ({
+              id: node.id,
+              type: node.type as NodeType,
+              position: node.position,
+              data: node.data || {},
+              name: node.type || "",
+              workflowId: id,
+            })),
+          });
+        }
+
+        // Create new connections
+        if (edges.length > 0) {
+          await tx.connection.createMany({
+            data: edges.map((edge) => ({
+              id: `conn_${Date.now()}_${Math.random()}`,
+              workflow: id,
+              fromNodeId: edge.source,
+              toNodeId: edge.target,
+              fromOutput: edge.sourceHandle || "main",
+              toInput: edge.targetHandle || "main",
+            })),
+          });
+        }
+
+        // Update the workflow timestamp
+        return await tx.workflow.update({
+          where: {
+            userId: ctx.auth.user.id,
+            id: input.id,
+          },
+          data: {
+            updatedAt: new Date(),
+          },
+        });
       });
     }),
 

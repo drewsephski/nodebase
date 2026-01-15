@@ -13,7 +13,7 @@ export const AddNodeButton = memo(() => {
         onClick={() => {}}
         size="icon"
         variant="outline"
-        className="bg-gray-200 hover:bg-primary hover:text-white"
+        className="bg-card border-border hover:bg-primary hover:text-primary-foreground"
       >
         <PlusIcon className="size-4" />
       </Button>
