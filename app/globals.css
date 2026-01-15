@@ -220,3 +220,103 @@
 .react-flow__node.selected #base-node {
   @apply ring-3 ring-muted-foreground/25 shadow-lg;
 }
+
+/* React Flow dark theme overrides */
+div.react-flow__controls {
+  background-color: var(--card) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1) !important;
+}
+
+.react-flow__controls-button {
+  background-color: var(--card) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--muted-foreground) !important;
+  border-bottom: 1px solid var(--border) !important;
+}
+
+.react-flow__controls-button:last-child {
+  border-bottom: none !important;
+}
+
+.react-flow__controls-button:hover {
+  background-color: var(--accent) !important;
+  color: var(--accent-foreground) !important;
+}
+
+.react-flow__controls-button svg {
+  color: currentColor !important;
+}
+
+/* MiniMap dark theme */
+div.react-flow__minimap {
+  background-color: var(--card) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1) !important;
+}
+
+.react-flow__minimap-mask {
+  fill: var(--muted) !important;
+  stroke: var(--border) !important;
+}
+
+.react-flow__minimap-node {
+  fill: var(--card) !important;
+  stroke: var(--border) !important;
+}
+
+/* Background pattern */
+.react-flow__background {
+  background-color: var(--background) !important;
+}
+
+.react-flow__background-pattern-dots {
+  fill: var(--muted-foreground) !important;
+  opacity: 0.2 !important;
+}
+
+/* Selection and interaction */
+.react-flow__selection {
+  background-color: var(--primary) !important;
+  opacity: 0.1 !important;
+  border: 1px solid var(--primary) !important;
+}
+
+.react-flow__edge-path {
+  stroke: var(--border) !important;
+}
+
+.react-flow__edge-path.selected {
+  stroke: var(--primary) !important;
+}
+
+.react-flow__edge.selected .react-flow__edge-path {
+  stroke: var(--primary) !important;
+}
+
+/* Handle dark theme improvements */
+.react-flow__handle {
+  border: 1px solid var(--border) !important;
+  background-color: var(--muted) !important;
+}
+
+.react-flow__handle.connecting {
+  background-color: var(--primary) !important;
+}
+
+.react-flow__handle.valid {
+  background-color: #16a34a !important;
+}
+
+/* Panel styling */
+.react-flow__panel {
+  background-color: var(--card) !important;
+  opacity: 0.95 !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+/* Attributions (hidden in proOptions but just in case) */
+.react-flow__attribution {
+  background-color: var(--card) !important;
+  color: var(--muted-foreground) !important;
+}

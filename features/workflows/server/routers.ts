@@ -12,6 +12,26 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 
 export const workFlowRouter = createTRPCRouter({
+  execute: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async({ ctx, input }) => {
+      const workflow = await prisma.workflow.findUniqueOrThrow({
+        where: {
+          id: input.id,
+          userId: ctx.auth.user.id,
+        },
+      });
+
+      await inngest.send({
+        name: "workflows/execute.workflow",
+        data: {
+          workflowId: input.id,
+        },
+      });
+
+      return workflow;
+      // TODO: Execute workflow
+  }),
   create: protectedProcedure.mutation(({ ctx }) => {
     return prisma.workflow.create({
       data: {
@@ -29,13 +49,25 @@ export const workFlowRouter = createTRPCRouter({
   }),
   remove: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .mutation(({ ctx, input }) => {
-      return prisma.workflow.delete({
+    .mutation(async ({ ctx, input }) => {
+      const workflow = await prisma.workflow.findFirst({
         where: {
           userId: ctx.auth.user.id,
           id: input.id,
         },
       });
+
+      if (!workflow) {
+        return { success: false, message: "Workflow not found" };
+      }
+
+      await prisma.workflow.delete({
+        where: {
+          id: input.id,
+        },
+      });
+
+      return { success: true, message: "Workflow deleted successfully" };
     }),
 
   updateNodes: protectedProcedure

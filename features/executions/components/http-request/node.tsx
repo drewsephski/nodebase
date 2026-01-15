@@ -1,7 +1,7 @@
 "use client";
 
 import type { NodeProps, Node } from "@xyflow/react";
-import { BaseExecutionNode } from "./base-execution-node";
+import { BaseExecutionNode } from "../base-execution-node";
 import { GlobeIcon } from "lucide-react";
 import { memo, useState } from "react";
 import { HttpRequestDialog } from "./dialog";
@@ -15,13 +15,12 @@ import {
   ZodString,
 } from "zod";
 import { useReactFlow } from "@xyflow/react";
-import { FormType } from "./dialog";
+import { HttpRequestFormValues } from "./dialog";
 
 type HttpRequestNodeData = {
   endpoint?: string;
-  method?: "GET" | "POST" | "PUT" | "DELETE";
+  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   body?: string;
-  [key: string]: unknown;
 };
 type HttpRequestNodeType = Node<HttpRequestNodeData>;
 
@@ -36,16 +35,14 @@ export const HttpRequestNode = memo((props: NodeProps<HttpRequestNodeType>) => {
     setDialogOpen(true);
   };
 
-  const handleSubmit = (values: FormType) => {
+  const handleSubmit = (values: HttpRequestFormValues) => {
     setNodes((nodes) => nodes.map((node) => {
         if (node.id === props.id) {
             return {
                 ...node,
                 data: {
                     ...node.data,
-                    endpoint: values.endpoint,
-                    method: values.method,
-                    body: values.body,
+                    ...values,
                 },
             };
         }
@@ -65,9 +62,7 @@ export const HttpRequestNode = memo((props: NodeProps<HttpRequestNodeType>) => {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         onSubmit={handleSubmit}
-        defaultEndpoint={nodeData.endpoint}
-        defaultMethod={nodeData.method}
-        defaultBody={nodeData.body}
+        defaultValues={nodeData}
       />
       <BaseExecutionNode
         {...props}
