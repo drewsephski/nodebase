@@ -9,6 +9,7 @@
         "@ai-sdk/google": "^2.0.23",
         "@ai-sdk/openai": "^2.0.52",
         "@hookform/resolvers": "^5.2.2",
+        "@inngest/realtime": "^0.4.5",
         "@paralleldrive/cuid2": "^3.0.0",
         "@polar-sh/better-auth": "^1.1.9",
         "@polar-sh/sdk": "^0.36.1",
@@ -282,6 +283,8 @@
     "@img/sharp-win32-x64": ["@img/sharp-win32-x64@0.34.4", "", { "os": "win32", "cpu": "x64" }, "sha512-xIyj4wpYs8J18sVN3mSQjwrw7fKUqRw+Z5rnHNCy5fYTxigBz81u5mOMPmFumwjcn8+ld1ppptMBCLic1nz6ig=="],
 
     "@inngest/ai": ["@inngest/ai@0.1.6", "", { "dependencies": { "@types/node": "^22.10.5", "typescript": "^5.7.3" } }, "sha512-4hIvD87LnMFSphkbSToB1EkE9epktyZU2xUj6OFCCj/bn379KfbZbhWcCJEyso0P9Ux4vsNTxiSu9E7JSI9HCQ=="],
+
+    "@inngest/realtime": ["@inngest/realtime@0.4.5", "", { "dependencies": { "@standard-schema/spec": "^1.0.0", "debug": "^4.3.4", "inngest": "^3.42.3", "zod": "^3.25.0 || ^4.0.0" }, "peerDependencies": { "react": ">=18.0.0" } }, "sha512-idT9MPazztBoTkxHIJMJ5oQUhY5P8/RLYtFZighmsTNRLJ/xTP7uAzh899nuorQeCVc+57yecjQ/52UZoIdrPQ=="],
 
     "@isaacs/fs-minipass": ["@isaacs/fs-minipass@4.0.1", "", { "dependencies": { "minipass": "^7.0.4" } }, "sha512-wgm9Ehl2jpeqP3zw/7mo3kRHFp5MEDhqAdwy1fTGkHAwnkGOVsgpvQhL8B5n1qlb01jV3n/bI0ZfZp5lWA1k4w=="],
 
