@@ -43,6 +43,12 @@ interface Props {
 }
 
 const formSchema = z.object({
+  variableName: z
+    .string()
+    .min(1, "Variable name is required")
+    .regex(/^[A-Za-z_$][A-Za-z0-9_$]*$/, {
+      message: "Variable name must start with a letter or underscore and contain only letters, numbers, and underscores",
+    }),
   endpoint: z.url({ message: "Please enter a valid URL" }),
   method: z.enum(["GET", "POST", "PUT", "PATCH", "DELETE"]),
   body: z.string().optional(),
@@ -58,6 +64,7 @@ export const HttpRequestDialog = ({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      variableName: defaultValues.variableName || "",
       endpoint: defaultValues.endpoint || "",
       method: defaultValues.method || "GET",
       body: defaultValues.body || "",
@@ -67,12 +74,15 @@ export const HttpRequestDialog = ({
   useEffect(() => {
     if (open) {
       form.reset({
+        variableName: defaultValues.variableName || "",
         endpoint: defaultValues.endpoint || "",
         method: defaultValues.method || "GET",
         body: defaultValues.body || "",
       });
     }
   }, [defaultValues, open, form]);
+
+  const watchVariableName = form.watch("variableName");
 
   const watchMethod = form.watch("method");
   const showBodyField = ["POST", "PUT", "PATCH"].includes(watchMethod);
@@ -95,15 +105,32 @@ export const HttpRequestDialog = ({
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6 mt-4">
             <FormField
               control={form.control}
-              name="endpoint"
+              name="variableName"
               render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Variable Name</FormLabel>
+                  <FormDescription>
+                   What you&apos;ll call the result in other nodes:&nbsp;
+                    <code>{`{{ ${watchVariableName || "variableName"} }}`}</code>
+                  </FormDescription>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="endpoint"
+              render={() => (
                 <FormItem>
                   <FormLabel>Endpoint</FormLabel>
                   <FormControl>
-                    <Input placeholder="https://api.example.com/endpoint" {...field} />
+                    <Input placeholder="https://api.example.com/endpoint" />
                   </FormControl>
                   <FormDescription>
-                    Static URL or use {"{{variables}}"} for simple values or {"{{json variable}}"} to stringify objects
+                    Static URL or use <code>{"{{variables}}"}</code> for simple values or <br/> <code>{"{{json variable}}"}</code> to stringify objects
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

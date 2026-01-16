@@ -3,14 +3,11 @@
 import {
   CreditCardIcon,
   JoystickIcon,
-  HomeIcon,
-  SettingsIcon,
   KeyIcon,
   LogOutIcon,
   StarIcon,
   FolderOpenIcon,
 } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -25,8 +22,23 @@ import {
   SidebarMenu,
 } from "@/components/ui/sidebar";
 import { authClient } from "@/lib/auth-client";
-import { auth } from "@/lib/auth";
 import { useHasActiveSubscription } from "@/features/subscriptions/hooks/use-subscription";
+
+const Logo = ({ className }: { className?: string }) => (
+  <svg
+    className={className}
+    width="52"
+    height="44"
+    viewBox="0 0 53 44"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M23.2997 0L52.0461 28.6301V44H38.6311V34.1553L17.7522 13.3607L13.415 13.3607L13.415 44H0L0 0L23.2997 0ZM38.6311 15.2694V0L52.0461 0V15.2694L38.6311 15.2694Z"
+      fill="#212326"
+    />
+  </svg>
+);
 
 const menuItems = [
   {
@@ -50,13 +62,12 @@ export const AppSidebar = () => {
   const pathname = usePathname();
   const router = useRouter();
   const { hasActiveSubscription } = useHasActiveSubscription();
-  const signOut = authClient.signOut;
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
         <SidebarMenuButton asChild className="gap-x-4 h-12 px-4">
           <Link href="/workflows" prefetch>
-            <Image src="logos/logo.svg" alt="NodeBase" width={32} height={32} />
+            <Logo className="h-8 w-8" />
             <span className="text-sm font-semibold">NodeBase</span>
           </Link>
         </SidebarMenuButton>
