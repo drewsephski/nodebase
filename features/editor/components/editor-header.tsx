@@ -11,7 +11,6 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useSuspenseWorkflow } from "@/features/workflows/hooks/use-workflows";
@@ -81,7 +80,7 @@ export const EditorNameInput = ({ workflowId }: { workflowId: string }) => {
 
     try {
       await updateWorkflowName.mutateAsync({ id: workflowId, name });
-    } catch (error) {
+    } catch {
       setName(workflow.name);
     } finally {
       setIsEditing(false);
@@ -99,6 +98,17 @@ export const EditorNameInput = ({ workflowId }: { workflowId: string }) => {
 
   if (!isEditing) {
     return (
+      <BreadcrumbItem
+        onClick={() => setIsEditing(true)}
+        className="cursor-pointer hover:text-foreground transition-colors"
+      >
+        {workflow.name}
+      </BreadcrumbItem>
+    );
+  }
+
+  return (
+    <BreadcrumbItem>
       <Input
         disabled={updateWorkflowName.isPending}
         ref={inputRef}
@@ -106,18 +116,8 @@ export const EditorNameInput = ({ workflowId }: { workflowId: string }) => {
         onKeyDown={handleKeyDown}
         onChange={(e) => setName(e.target.value)}
         onBlur={handleSave}
-        readOnly
         className="h-7 w-auto min-w-[100px] px-2"
       />
-    );
-  }
-
-  return (
-    <BreadcrumbItem
-      onClick={() => setIsEditing(true)}
-      className="cursor-pointer hover:text-foreground transition-colors"
-    >
-      {workflow.name}
     </BreadcrumbItem>
   );
 };
