@@ -123,11 +123,11 @@ export const HttpRequestDialog = ({
             <FormField
               control={form.control}
               name="endpoint"
-              render={() => (
+              render={({ field }) => (
                 <FormItem>
                   <FormLabel>Endpoint</FormLabel>
                   <FormControl>
-                    <Input placeholder="https://api.example.com/endpoint" />
+                    <Input placeholder="https://api.example.com/endpoint" {...field} />
                   </FormControl>
                   <FormDescription>
                     Static URL or use <code>{"{{variables}}"}</code> for simple values or <br/> <code>{"{{json variable}}"}</code> to stringify objects

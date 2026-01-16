@@ -40,6 +40,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "global": "^4.4.0",
+    "handlebars": "^4.7.8",
     "inngest": "^3.44.3",
     "inngest-cli": "^1.12.1",
     "jotai": "^2.15.0",
