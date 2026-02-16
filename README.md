@@ -9,7 +9,7 @@ Nodebase is a visual canvas for wiring together AI agents, transforms, and tool 
 - Clerk authentication, Convex storage, and tenant-aware API endpoints for automation.
 
 ## Quick Start
-1. `git clone https://github.com/firecrawl/open-agent-builder.git` (Nodebase lives on this repo) and `npm install`.
+1. `git clone https://github.com/drewsephski/nodebase.git` and `npm install`.
 2. Run `npm run dev` after setting `NEXT_PUBLIC_CONVEX_URL`, `FIRECRAWL_API_KEY`, and Clerk credentials in `.env.local`.
 3. Open the UI, build a workflow, and execute it—results stream in real time and persist in Convex.
 
