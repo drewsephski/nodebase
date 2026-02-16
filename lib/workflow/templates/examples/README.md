@@ -1,6 +1,6 @@
 # Example Workflow Templates
 
-This directory contains a curated set of example workflow templates that demonstrate the capabilities of the Open Agent Builder platform. Examples progress from simple to complex, helping you learn by doing.
+This directory contains a curated set of example workflow templates that demonstrate the capabilities of the Nodebase platform. Examples progress from simple to complex, helping you learn by doing.
 
 ## 🎯 MCP Integration Status
 

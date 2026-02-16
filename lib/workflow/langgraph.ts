@@ -1,5 +1,5 @@
 /**
- * LangGraph Integration for Open Agent Builder
+ * LangGraph Integration for Nodebase
  *
  * This module provides LangGraph-powered workflow execution with:
  * - StateGraph-based orchestration
@@ -85,7 +85,7 @@ export const WorkflowStateAnnotation = Annotation.Root({
 
 /**
  * LangGraph Workflow Executor
- * Converts Open Agent Builder workflows to LangGraph StateGraph
+ * Converts Nodebase workflows to LangGraph StateGraph
  */
 export class LangGraphExecutor {
   private workflow: Workflow;

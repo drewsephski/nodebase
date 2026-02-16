@@ -32,8 +32,8 @@ export default function RootLayout({
       <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
         <html lang="en">
           <head>
-            <title>Open Agent Builder</title>
-            <meta name="description" content="Build AI agents and workflows with visual programming" />
+            <title>Nodebase</title>
+            <meta name="description" content="Build Nodebase workflows and automations with a visual programming canvas" />
             <link rel="icon" href="/favicon.png" />
             <ColorStyles />
           </head>
@@ -51,4 +51,3 @@ export default function RootLayout({
     </ClerkProvider>
   );
 }
-

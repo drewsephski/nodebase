@@ -7,7 +7,7 @@ export default function HomeHeroBadge() {
       href="#"
       onClick={(e) => e.preventDefault()}
     >
-      <div className="px-8 text-label-x-small">OpenAI Inspired Agent Builder</div>
+      <div className="px-8 text-label-x-small">Open-Source AI Workflow Builder</div>
 
       <div className="p-1">
         <div className="size-18 bg-accent-black flex-center rounded-full group-hover:bg-heat-100 transition-all group-hover:w-30">

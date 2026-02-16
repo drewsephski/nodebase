@@ -2,7 +2,7 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 /**
- * Convex Schema for Open Agent Builder
+ * Convex Schema for Nodebase
  *
  * Replaces Upstash Redis for workflow storage
  */
