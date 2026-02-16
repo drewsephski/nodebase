@@ -127,7 +127,7 @@ export const testConnection = action({
   args: {
     id: v.id("mcpServers"),
   },
-  handler: async ({ runMutation, runQuery }, { id }) => {
+  handler: async ({ runMutation, runQuery }: { runMutation: any, runQuery: any }, { id }: { id: any }) => {
     const server = await runQuery(api.mcpServers.getMCPServer, { id });
 
     if (!server) {
