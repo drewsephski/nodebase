@@ -2,20 +2,25 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
+import type { Node } from "@xyflow/react";
 
 interface ExtractNodePanelProps {
-  nodeData: any;
-  onUpdate: (nodeId: string, updates: any) => void;
+  node: Node | null;
+  nodes: Node[];
   onClose: () => void;
-  onAddMCP: () => void;
+  onDelete: (nodeId: string) => void;
+  onUpdate: (nodeId: string, updates: any) => void;
 }
 
 export default function ExtractNodePanel({
-  nodeData,
-  onUpdate,
+  node,
+  nodes,
   onClose,
-  onAddMCP,
+  onDelete,
+  onUpdate,
 }: ExtractNodePanelProps) {
+  const nodeData = node?.data as any;
+  
   const [instructions, setInstructions] = useState(nodeData?.instructions || 'Extract information from the input');
   const [model, setModel] = useState(nodeData?.model || 'gpt-4o');
   const [customModel, setCustomModel] = useState('');
@@ -42,13 +47,15 @@ export default function ExtractNodePanel({
   }, [jsonSchema]);
 
   useEffect(() => {
-    onUpdate(nodeData?.id, {
-      instructions,
-      model,
-      jsonSchema,
-      nodeType: 'extract',
-    });
-  }, [instructions, model, jsonSchema, nodeData?.id, onUpdate]);
+    if (node?.id) {
+      onUpdate(node.id, {
+        instructions,
+        model,
+        jsonSchema,
+        nodeType: 'extract',
+      });
+    }
+  }, [instructions, model, jsonSchema, node?.id, onUpdate]);
 
   return (
     <AnimatePresence>
@@ -111,11 +118,21 @@ export default function ExtractNodePanel({
                 <option value="anthropic/claude-haiku-4-5-20251001">Claude Haiku 4.5</option>
               </optgroup>
               <optgroup label="OpenAI">
-                <option value="gpt-4o">GPT-5</option>
-                <option value="gpt-4o-mini">GPT-5 Mini</option>
+                <option value="openai/gpt-4o">GPT-5</option>
+                <option value="openai/gpt-4o-mini">GPT-5 Mini</option>
               </optgroup>
               <optgroup label="Groq">
-                <option value="groq/openai/gpt-oss-120b">GPT OSS 120B</option>
+                <option value="groq/gpt-oss-120b">GPT OSS 120B</option>
+              </optgroup>
+              <optgroup label="OpenRouter">
+                <option value="openrouter/openai/gpt-oss-120b">GPT OSS 120B (via OpenRouter)</option>
+                <option value="openrouter/anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet (via OpenRouter)</option>
+                <option value="openrouter/openai/gpt-4o">GPT-4o (via OpenRouter)</option>
+                <option value="openrouter/openai/gpt-4o-mini">GPT-4o Mini (via OpenRouter)</option>
+                <option value="openrouter/google/gemini-2.0-flash-001">Gemini 2.0 Flash (via OpenRouter)</option>
+                <option value="openrouter/meta-llama/llama-3.1-405b-instruct">Llama 3.1 405B (via OpenRouter)</option>
+                <option value="openrouter/deepseek/deepseek-r1">DeepSeek R1 (via OpenRouter)</option>
+                <option value="openrouter/qwen/qwen-2.5-72b-instruct">Qwen 2.5 72B (via OpenRouter)</option>
               </optgroup>
             </select>
           </div>
@@ -147,15 +164,6 @@ export default function ExtractNodePanel({
               <label className="block text-label-small text-black-alpha-48">
                 MCP Tools (Optional)
               </label>
-              <button
-                onClick={onAddMCP}
-                className="px-10 py-6 bg-background-base hover:bg-black-alpha-4 border border-border-faint rounded-6 text-body-small text-accent-black transition-colors flex items-center gap-6"
-              >
-                <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-                Add MCP
-              </button>
             </div>
 
             {nodeData?.mcpTools && nodeData.mcpTools.length > 0 ? (
@@ -172,7 +180,7 @@ export default function ExtractNodePanel({
                       <button
                         onClick={() => {
                           const newTools = nodeData.mcpTools.filter((_: any, i: number) => i !== index);
-                          onUpdate(nodeData.id, { mcpTools: newTools });
+                          onUpdate(node?.id || '', { mcpTools: newTools });
                         }}
                         className="w-24 h-24 rounded-4 hover:bg-black-alpha-4 transition-colors flex items-center justify-center group"
                       >

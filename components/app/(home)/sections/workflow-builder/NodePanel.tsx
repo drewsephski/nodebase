@@ -82,7 +82,21 @@ export default function NodePanel({
         models.push({
           provider: 'Groq',
           models: [
-            { id: 'groq/openai/gpt-oss-120b', name: 'GPT OSS 120B' },
+            { id: 'groq/gpt-oss-120b', name: 'GPT OSS 120B' },
+          ]
+        });
+      } else if (key.provider === 'openrouter') {
+        models.push({
+          provider: 'OpenRouter',
+          models: [
+            { id: 'openrouter/openai/gpt-oss-120b', name: 'GPT OSS 120B' },
+            { id: 'openrouter/anthropic/claude-3.5-sonnet', name: 'Claude 3.5 Sonnet' },
+            { id: 'openrouter/openai/gpt-4o', name: 'GPT-4o' },
+            { id: 'openrouter/openai/gpt-4o-mini', name: 'GPT-4o Mini' },
+            { id: 'openrouter/google/gemini-2.0-flash-001', name: 'Gemini 2.0 Flash' },
+            { id: 'openrouter/meta-llama/llama-3.1-405b-instruct', name: 'Llama 3.1 405B' },
+            { id: 'openrouter/deepseek/deepseek-r1', name: 'DeepSeek R1' },
+            { id: 'openrouter/qwen/qwen-2.5-72b-instruct', name: 'Qwen 2.5 72B' },
           ]
         });
       }

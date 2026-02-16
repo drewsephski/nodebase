@@ -61,7 +61,7 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
   const [newKeyName, setNewKeyName] = useState("");
   const [generatedKey, setGeneratedKey] = useState<string | null>(null);
   const [showAddLLMKey, setShowAddLLMKey] = useState(false);
-  const [selectedProvider, setSelectedProvider] = useState<'anthropic' | 'openai' | 'groq' | null>(null);
+  const [selectedProvider, setSelectedProvider] = useState<'anthropic' | 'openai' | 'groq' | 'openrouter' | null>(null);
 
   const apiKeys = useQuery(api.apiKeys.list, {});
   const generateKey = useMutation(api.apiKeys.generate);
@@ -197,11 +197,12 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
 
                   {/* Provider Cards with Keys */}
                   <div className="space-y-8">
-                    {['anthropic', 'openai', 'groq'].map(provider => {
+                    {['anthropic', 'openai', 'groq', 'openrouter'].map(provider => {
                       const providerKey = userLLMKeys?.find(k => k.provider === provider && k.isActive);
                       const hasEnvKey = provider === 'anthropic' ? serverConfig?.anthropicConfigured :
                                        provider === 'openai' ? serverConfig?.openaiConfigured :
-                                       serverConfig?.groqConfigured;
+                                       provider === 'groq' ? serverConfig?.groqConfigured :
+                                       false; // OpenRouter doesn't have env key in serverConfig
 
                       return (
                         <div key={provider} className="p-12 bg-background-base rounded-8 border border-border-faint">
@@ -1150,7 +1151,7 @@ function AddMCPModal({ isOpen, onClose, onSave, editingServer }: AddMCPModalProp
 interface AddLLMKeyModalProps {
   isOpen: boolean;
   onClose: () => void;
-  selectedProvider: 'anthropic' | 'openai' | 'groq' | null;
+  selectedProvider: 'anthropic' | 'openai' | 'groq' | 'openrouter' | null;
   onSave: (provider: string, apiKey: string, label?: string) => Promise<void>;
 }
 
@@ -1179,6 +1180,8 @@ function AddLLMKeyModal({ isOpen, onClose, selectedProvider, onSave }: AddLLMKey
         return 'https://platform.openai.com/api-keys';
       case 'groq':
         return 'https://console.groq.com/keys';
+      case 'openrouter':
+        return 'https://openrouter.ai/keys';
       default:
         return '#';
     }
@@ -1208,13 +1211,14 @@ function AddLLMKeyModal({ isOpen, onClose, selectedProvider, onSave }: AddLLMKey
             <label className="text-body-small text-black-alpha-64 mb-4 block">Provider</label>
             <select
               value={formData.provider}
-              onChange={(e) => setFormData({ ...formData, provider: e.target.value as 'anthropic' | 'openai' | 'groq' })}
+              onChange={(e) => setFormData({ ...formData, provider: e.target.value as 'anthropic' | 'openai' | 'groq' | 'openrouter' })}
               disabled={!!selectedProvider}
               className="w-full px-12 py-8 bg-background-base border border-border-faint rounded-8 text-body-small text-accent-black capitalize"
             >
               <option value="anthropic">Anthropic</option>
               <option value="openai">OpenAI</option>
               <option value="groq">Groq</option>
+              <option value="openrouter">OpenRouter</option>
             </select>
           </div>
 
@@ -1228,7 +1232,8 @@ function AddLLMKeyModal({ isOpen, onClose, selectedProvider, onSave }: AddLLMKey
                 placeholder={
                   formData.provider === 'anthropic' ? 'sk-ant-...' :
                   formData.provider === 'openai' ? 'sk-proj-...' :
-                  'gsk_...'
+                  formData.provider === 'groq' ? 'gsk_...' :
+                  'sk-or-...'
                 }
                 className="w-full pr-32 px-12 py-8 bg-background-base border border-border-faint rounded-8 text-body-small text-accent-black font-mono"
               />

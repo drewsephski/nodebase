@@ -6,24 +6,28 @@ import { cn } from "@/utils/cn";
 
 export default function HeaderToggle({
   dropdownContent,
+  dropdownId,
 }: {
   dropdownContent: React.ReactNode;
+  dropdownId?: string;
 }) {
   const {
-    dropdownContent: headerDropdownContent,
+    activeDropdownId,
     clearDropdown,
-    setDropdownContent,
+    setActiveDropdownId,
   } = useHeaderContext();
+
+  const isActive = dropdownId && activeDropdownId === dropdownId;
 
   return (
     <Button
       className="lg:hidden"
       variant="secondary"
       onClick={() => {
-        if (dropdownContent === headerDropdownContent) {
+        if (isActive) {
           clearDropdown(true);
-        } else {
-          setDropdownContent(dropdownContent);
+        } else if (dropdownId) {
+          setActiveDropdownId(dropdownId);
         }
       }}
     >
@@ -37,7 +41,7 @@ export default function HeaderToggle({
       >
         <path
           className={cn("transition-all origin-center", {
-            "rotate-45 -translate-y-4": headerDropdownContent,
+            "rotate-45 -translate-y-4": activeDropdownId,
           })}
           d="M2.28906 13.9609H17.7057"
           stroke="#262626"
@@ -51,7 +55,7 @@ export default function HeaderToggle({
         <path
           className={cn("transition-all origin-center", {
             "-rotate-45 translate-y-3 translate-x-[2.5px]":
-              headerDropdownContent,
+              activeDropdownId,
           })}
           d="M2.28906 6.03906H17.7057"
           stroke="#262626"

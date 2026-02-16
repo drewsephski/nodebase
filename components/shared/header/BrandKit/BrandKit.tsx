@@ -17,7 +17,7 @@ import Icon from "./_svg/Icon";
 
 export default function HeaderBrandKit() {
   const [open, setOpen] = useState(false);
-  const { dropdownContent, clearDropdown } = useHeaderContext();
+  const { activeDropdownId, clearDropdown } = useHeaderContext();
 
   useEffect(() => {
     document.addEventListener("click", () => {
@@ -26,10 +26,10 @@ export default function HeaderBrandKit() {
   }, [open]);
 
   useEffect(() => {
-    if (dropdownContent) {
+    if (activeDropdownId) {
       setOpen(false);
     }
-  }, [dropdownContent]);
+  }, [activeDropdownId]);
 
   return (
     <div className="relative">

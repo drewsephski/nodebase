@@ -18,7 +18,7 @@ export default function HeaderNavItem({
   dropdown?: JSX.Element;
   dropdownId?: string;
 }) {
-  const { activeDropdownId, setActiveDropdownId, clearDropdown } =
+  const { activeDropdownId, setActiveDropdownId, clearDropdown, resetDropdownTimeout } =
     useHeaderContext();
 
   const active = dropdownId && activeDropdownId === dropdownId;

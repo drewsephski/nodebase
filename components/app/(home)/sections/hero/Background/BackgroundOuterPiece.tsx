@@ -11,7 +11,7 @@ import { cn } from "@/utils/cn";
 
 export const BackgroundOuterPiece = () => {
   const [noRender, setNoRender] = useState(false);
-  const { dropdownContent } = useHeaderContext();
+  const { activeDropdownId } = useHeaderContext();
   const { headerHeight } = useHeaderHeight();
 
   useEffect(() => {
@@ -41,7 +41,7 @@ export const BackgroundOuterPiece = () => {
     <div
       className={cn(
         "cw-[1335px] transition-all z-[105] absolute top-0 flex justify-between h-[calc(100%+21px)] duration-[200ms] pointer-events-none",
-        { "opacity-0": noRender || dropdownContent || !headerHeight },
+        { "opacity-0": noRender || activeDropdownId || !headerHeight },
       )}
       style={{
         paddingTop: headerHeight - 10,
