@@ -10,7 +10,7 @@ import { resolveMCPServers, migrateMCPData } from '@/lib/mcp/resolver';
 export async function executeAgentNode(
   node: WorkflowNode,
   state: WorkflowState,
-  apiKeys?: { anthropic?: string; groq?: string; openai?: string; firecrawl?: string }
+  apiKeys?: { anthropic?: string; groq?: string; openai?: string; openrouter?: string; firecrawl?: string }
 ): Promise<any> {
   const { data } = node;
 
@@ -84,7 +84,7 @@ export async function executeAgentNode(
       : [{ role: 'user' as const, content: contextualPrompt }];
 
     // Parse model string (handle models with slashes like groq/openai/gpt-oss-120b)
-    const modelString = data.model || 'anthropic/claude-sonnet-4-5-20250929';
+    const modelString = data.model || 'openai/gpt-oss-120b:free';
     let provider: string;
     let modelName: string;
 
@@ -378,6 +378,27 @@ export async function executeAgentNode(
         responseText = response.content as string;
         usage = response.response_metadata?.usage || {};
       }
+    } else if (provider === 'openrouter' && apiKeys?.openrouter) {
+      // Use OpenRouter AI SDK provider for unified access to 300+ models
+      const { createOpenRouter } = await import('@openrouter/ai-sdk-provider');
+      const { generateText } = await import('ai');
+      
+      const openrouter = createOpenRouter({
+        apiKey: apiKeys.openrouter,
+      });
+
+      // Use the OpenRouter model directly (modelName includes provider, e.g., "anthropic/claude-3.5-sonnet")
+      const result = await generateText({
+        model: openrouter(modelName),
+        messages: messages as any,
+      });
+
+      responseText = result.text;
+      usage = {
+        prompt_tokens: result.usage?.inputTokens,
+        completion_tokens: result.usage?.outputTokens,
+        total_tokens: (result.usage?.inputTokens || 0) + (result.usage?.outputTokens || 0),
+      };
     } else {
       throw new Error(`No API key available for provider: ${provider}`);
     }
@@ -421,10 +442,11 @@ export async function executeAgentNode(
     }
 
     if (errorMessage.includes('No API key available')) {
-      throw new Error('No API key configured. Please add an Anthropic, OpenAI, or Groq API key in your .env.local file.');
+      throw new Error('No API key configured. Please add an Anthropic, OpenAI, Groq, or OpenRouter API key in your .env.local file.');
     }
 
     throw new Error(`Agent execution failed: ${errorMessage}`);
   }
 }
+
 

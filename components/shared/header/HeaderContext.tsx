@@ -10,8 +10,8 @@ import React, {
 } from "react";
 
 interface HeaderContextType {
-  dropdownContent: React.ReactNode;
-  setDropdownContent: (content: React.ReactNode) => void;
+  activeDropdownId: string | null;
+  setActiveDropdownId: (id: string | null) => void;
   clearDropdown: (force?: boolean) => void;
   resetDropdownTimeout: () => void;
   dropdownKey: number;
@@ -22,7 +22,7 @@ interface HeaderContextType {
 const HeaderContext = createContext<HeaderContextType | undefined>(undefined);
 
 export const HeaderProvider = ({ children }: { children: React.ReactNode }) => {
-  const [dropdownContent, setDropdownContent] = useState<React.ReactNode>(null);
+  const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
   const [dropdownKey, setDropdownKey] = useState(0);
   const headerHeight = useRef(0);
   const headerTop = useRef(0);
@@ -31,8 +31,7 @@ export const HeaderProvider = ({ children }: { children: React.ReactNode }) => {
 
   const clearDropdown = (force?: boolean) => {
     if (force) {
-      setDropdownContent(null);
-
+      setActiveDropdownId(null);
       return;
     }
 
@@ -41,7 +40,7 @@ export const HeaderProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     timeout.current = window.setTimeout(() => {
-      setDropdownContent(null);
+      setActiveDropdownId(null);
     }, 500);
   };
 
@@ -76,18 +75,17 @@ export const HeaderProvider = ({ children }: { children: React.ReactNode }) => {
         window.removeEventListener("scroll", onScroll);
       };
     }
-  }, [pathname]);
+  }, []);
 
   return (
     <HeaderContext.Provider
       value={{
-        dropdownContent,
-        setDropdownContent: (content) => {
+        activeDropdownId,
+        setActiveDropdownId: (id) => {
           resetDropdownTimeout();
-
-          if (content === dropdownContent) return;
+          if (id === activeDropdownId) return;
           setDropdownKey((prev) => prev + 1);
-          setDropdownContent(content);
+          setActiveDropdownId(id);
         },
         clearDropdown,
         resetDropdownTimeout,
@@ -125,7 +123,6 @@ export const useHeaderHeight = () => {
       });
 
       resizeObserver.observe(header);
-      setHeaderHeight(header.clientHeight);
 
       return () => {
         resizeObserver.disconnect();

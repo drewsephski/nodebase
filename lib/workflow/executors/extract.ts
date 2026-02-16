@@ -9,7 +9,7 @@ import { substituteVariables } from '../variable-substitution';
 export async function executeExtractNode(
   node: WorkflowNode,
   state: WorkflowState,
-  apiKeys?: { anthropic?: string; groq?: string; openai?: string; firecrawl?: string }
+  apiKeys?: { anthropic?: string; groq?: string; openai?: string; openrouter?: string; firecrawl?: string }
 ): Promise<any> {
   const { data } = node;
 

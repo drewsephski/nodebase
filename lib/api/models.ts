@@ -2,7 +2,7 @@
  * Model validation and configuration for LLM providers
  */
 
-export type Provider = 'openai' | 'anthropic' | 'groq';
+export type Provider = 'openai' | 'anthropic' | 'groq' | 'openrouter';
 
 export interface ModelConfig {
   provider: Provider;
@@ -17,6 +17,7 @@ export interface ModelConfig {
  * - OpenAI: Responses API
  * - Anthropic: Messages API with MCP beta
  * - Groq: Responses API (OpenAI-compatible)
+ * - OpenRouter: Unified API for 300+ models
  */
 export const SUPPORTED_MODELS = {
   openai: [
@@ -33,6 +34,18 @@ export const SUPPORTED_MODELS = {
     // Only Groq models that support Responses API (per Groq docs)
     'gpt-oss-120b',
   ],
+  openrouter: [
+    // Popular OpenRouter models - access to 300+ models through unified API
+    'openai/gpt-oss-120b',
+    'openai/gpt-4o',
+    'openai/gpt-4o-mini',
+    'anthropic/claude-3.5-sonnet',
+    'anthropic/claude-sonnet-4',
+    'google/gemini-2.0-flash-001',
+    'meta-llama/llama-3.1-405b-instruct',
+    'deepseek/deepseek-r1',
+    'qwen/qwen-2.5-72b-instruct',
+  ],
 } as const;
 
 /**
@@ -42,6 +55,7 @@ export const DEFAULT_MODELS = {
   openai: 'gpt-4o',
   anthropic: 'claude-sonnet-4-5-20250929', // Claude 4.5 Sonnet
   groq: 'gpt-oss-120b', // Using Responses API model for better MCP support
+  openrouter: 'openai/gpt-oss-120b', // Default to GPT OSS 120B via OpenRouter
 } as const;
 
 /**
@@ -49,6 +63,7 @@ export const DEFAULT_MODELS = {
  * Supports formats:
  * - "provider/model-name" (e.g., "openai/gpt-4o")
  * - "model-name" (defaults to openai provider)
+ * - OpenRouter models have format: "openrouter/provider/model" (e.g., "openrouter/anthropic/claude-3.5-sonnet")
  */
 export function parseModelString(modelString?: string): { provider: Provider; modelName: string } {
   if (!modelString) {
@@ -56,15 +71,23 @@ export function parseModelString(modelString?: string): { provider: Provider; mo
   }
 
   if (modelString.includes('/')) {
-    const [provider, modelName] = modelString.split('/', 2) as [string, string];
+    const parts = modelString.split('/');
+    const provider = parts[0];
 
     // Validate provider
-    if (provider !== 'openai' && provider !== 'anthropic' && provider !== 'groq') {
+    if (provider !== 'openai' && provider !== 'anthropic' && provider !== 'groq' && provider !== 'openrouter') {
       // Default to openai if provider is unknown
       return { provider: 'openai', modelName: DEFAULT_MODELS.openai };
     }
 
-    return { provider, modelName };
+    // For OpenRouter, the model name includes the provider (e.g., "anthropic/claude-3.5-sonnet")
+    // For other providers, the model name is just the second part
+    if (provider === 'openrouter') {
+      const modelName = parts.slice(1).join('/');
+      return { provider, modelName };
+    }
+
+    return { provider, modelName: parts[1] };
   }
 
   // No provider prefix, default to openai
@@ -108,7 +131,7 @@ export function getDefaultModel(provider: Provider): string {
  * Check if a provider is supported
  */
 export function isSupportedProvider(provider: string): provider is Provider {
-  return provider === 'openai' || provider === 'anthropic' || provider === 'groq';
+  return provider === 'openai' || provider === 'anthropic' || provider === 'groq' || provider === 'openrouter';
 }
 
 /**

@@ -1,319 +1,90 @@
-import EndpointsCrawl from "@/components/app/(home)/sections/endpoints/EndpointsCrawl/EndpointsCrawl";
-import EndpointsScrape from "@/components/app/(home)/sections/endpoints/EndpointsScrape/EndpointsScrape";
-import EndpointsSearch from "@/components/app/(home)/sections/endpoints/EndpointsSearch/EndpointsSearch";
-import EndpointsExtract from "@/components/app/(home)/sections/endpoints/Extract/Extract";
-import EndpointsMcp from "@/components/app/(home)/sections/endpoints/Mcp/Mcp";
-import { RenderEndpointIcon } from "@/components/shared/header/Nav/RenderEndpointIcon";
-import HeaderDropdownContent from "@/components/shared/header/Dropdown/Content/Content";
-import HeaderDropdownGithub from "@/components/shared/header/Dropdown/Github/Github";
-import HeaderDropdownStories from "@/components/shared/header/Dropdown/Stories/Stories";
-
-import Affiliate from "./_svg/Affiliate";
-import Api from "./_svg/Api";
-import ArrowRight from "./_svg/ArrowRight";
-import Careers from "./_svg/Careers";
-import Changelog from "./_svg/Changelog";
-import Chats from "./_svg/Chats";
-import Lead from "./_svg/Lead";
-import Platforms from "./_svg/Platforms";
-import Research from "./_svg/Research";
-import Student from "./_svg/Student";
-import Templates from "./_svg/Templates";
 import HeaderNavItem from "./Item/Item";
-import MCPIcon from "./_svg/MCP";
-import Image from "@/components/shared/image/Image";
-import GithubFlame from "@/components/shared/header/Dropdown/Github/Flame/Flame";
-import EndpointsMap from "@/components/app/(home)/sections/endpoints/EndpointsMap/EndpointsMap";
+import { JSX } from "react";
+import Link from "next/link";
+
+// Minimal tech-style dropdown with clean lines and subtle accents
+function WorkflowsDropdown() {
+  return (
+    <div className="p-6 flex gap-4 w-full justify-center">
+      {/* Start a Workflow - Blank Canvas */}
+      <Link
+        href="/?view=builder"
+        className="group flex-1 max-w-[280px] flex items-start gap-4 p-5 rounded-10 border border-neutral-200/80 bg-white hover:border-orange-300 hover:bg-orange-50/30 transition-all duration-200"
+      >
+        {/* Icon container */}
+        <div className="shrink-0 size-10 rounded-6 border border-neutral-200 bg-neutral-50 flex items-center justify-center group-hover:border-orange-400 group-hover:bg-orange-100 transition-all duration-200">
+          <svg className="size-5 text-neutral-600 group-hover:text-orange-600 transition-colors duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+          </svg>
+        </div>
+        
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-neutral-900 group-hover:text-orange-900 transition-colors duration-200">
+              Start a Workflow
+            </span>
+            <svg className="size-3.5 text-neutral-400 group-hover:text-orange-500 opacity-0 group-hover:opacity-100 translate-x-1 group-hover:translate-x-0 transition-all duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 4.5l15 15m0 0V8.25m0 11.25H8.25" />
+            </svg>
+          </div>
+          <span className="text-xs text-neutral-500 mt-1 block">
+            Create from scratch
+          </span>
+        </div>
+      </Link>
+
+      {/* View Templates */}
+      <Link
+        href="/?view=workflows"
+        className="group flex-1 max-w-[280px] flex items-start gap-4 p-5 rounded-10 border border-neutral-200/80 bg-white hover:border-orange-300 hover:bg-orange-50/30 transition-all duration-200"
+      >
+        {/* Icon container */}
+        <div className="shrink-0 size-10 rounded-6 border border-neutral-200 bg-neutral-50 flex items-center justify-center group-hover:border-orange-400 group-hover:bg-orange-100 transition-all duration-200">
+          <svg className="size-5 text-neutral-600 group-hover:text-orange-600 transition-colors duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+          </svg>
+        </div>
+        
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-neutral-900 group-hover:text-orange-900 transition-colors duration-200">
+              View Templates
+            </span>
+            <svg className="size-3.5 text-neutral-400 group-hover:text-orange-500 opacity-0 group-hover:opacity-100 translate-x-1 group-hover:translate-x-0 transition-all duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 4.5l15 15m0 0V8.25m0 11.25H8.25" />
+            </svg>
+          </div>
+          <span className="text-xs text-neutral-500 mt-1 block">
+            Browse pre-built workflows
+          </span>
+        </div>
+      </Link>
+    </div>
+  );
+}
+
+export { WorkflowsDropdown };
 
 export default function HeaderNav() {
   return (
-    <div className="flex gap-8 relative lg-max:hidden select-none">
+    <div className="flex select-none">
       {NAV_ITEMS.map((item) => (
-        <HeaderNavItem key={item.label} {...item} />
+        <HeaderNavItem key={item.label} {...item} dropdownId={item.label} />
       ))}
     </div>
   );
 }
 
-export const NAV_ITEMS = [
+export const NAV_ITEMS: Array<{
+  label: string;
+  href: string;
+  dropdown?: JSX.Element;
+}> = [
   {
-    label: "Products",
+    label: "Workflows",
     href: "#",
-    dropdown: (
-      <HeaderDropdownContent
-        navigationItems={[
-          {
-            label: "Endpoints",
-            items: [
-              {
-                icon: (
-                  <RenderEndpointIcon
-                    icon={EndpointsScrape}
-                    alwaysHeat
-                    triggerOnHover
-                  />
-                ),
-                label: "Scrape",
-                description: "Turn any url into clean data",
-                href: "https://docs.firecrawl.dev/features/scrape",
-                iconClassName: "-mt-1",
-              },
-              {
-                icon: (
-                  <RenderEndpointIcon
-                    icon={EndpointsCrawl}
-                    alwaysHeat
-                    triggerOnHover
-                  />
-                ),
-                label: "Crawl",
-                description: "Crawl entire websites",
-                href: "https://docs.firecrawl.dev/features/crawl",
-                iconClassName: "-mt-1",
-              },
-              {
-                icon: (
-                  <RenderEndpointIcon
-                    icon={EndpointsSearch}
-                    alwaysHeat
-                    triggerOnHover
-                  />
-                ),
-                label: "Search",
-                description: "Search and get page content",
-                href: "https://docs.firecrawl.dev/features/search",
-                iconClassName: "-mt-1",
-              },
-              {
-                icon: (
-                  <RenderEndpointIcon
-                    icon={EndpointsMap}
-                    alwaysHeat
-                    triggerOnHover
-                  />
-                ),
-                label: "Map",
-                description: "Get all links from a website",
-                href: "https://docs.firecrawl.dev/features/map",
-                iconClassName: "-mt-1",
-              },
-              {
-                icon: (
-                  <RenderEndpointIcon
-                    icon={EndpointsMcp}
-                    alwaysHeat
-                    triggerOnHover
-                  />
-                ),
-                label: "MCP",
-                description: "Connect Firecrawl to agents",
-                href: "https://docs.firecrawl.dev/features/mcp",
-                iconClassName: "-mt-1",
-              },
-
-              // Extract section in the same column, highlighted as a separate product
-              // {
-              //   icon: <RenderEndpointIcon icon={EndpointsExtract} alwaysHeat triggerOnHover />,
-              //   label: 'Extract',
-              //   description: 'Get structured data from single pages or entire websites with AI.',
-              //   href: '/extract',
-              //   big: true,
-              //   sectionLabel: 'Extract Product',
-              //   iconClassName: 'mt-4',
-              //   ctas: [
-              //     { label: 'View Extract', href: '/extract' },
-              //     { label: 'Try it now', href: '/playground?mode=extract' }
-              //   ]
-              // },
-            ],
-          },
-          {
-            label: "Use Cases",
-            items: [
-              {
-                icon: <Chats />,
-                label: "AI Platforms",
-                description: "Let customers build AI apps",
-                href: "https://docs.firecrawl.dev/use-cases/ai-platforms",
-                target: "_blank",
-              },
-              {
-                icon: <Lead />,
-                label: "Lead Enrichment",
-                description: "Enhance sales data",
-                href: "https://docs.firecrawl.dev/use-cases/lead-enrichment",
-                target: "_blank",
-              },
-              {
-                icon: <Platforms />,
-                label: "SEO Platforms",
-                description: "Power SEO/GEO tools",
-                href: "https://docs.firecrawl.dev/use-cases/seo-platforms",
-                target: "_blank",
-              },
-              {
-                icon: <Research />,
-                label: "Deep Research",
-                description: "Build research agents",
-                href: "https://docs.firecrawl.dev/use-cases/deep-research",
-                target: "_blank",
-              },
-              {
-                icon: <ArrowRight />,
-                label: "View more",
-                description: "Explore all use cases",
-                href: "https://docs.firecrawl.dev/use-cases/overview",
-                target: "_blank",
-              },
-            ],
-          },
-        ]}
-        sideContent={<HeaderDropdownStories />}
-        sideItem={{
-          icon: <ArrowRight />,
-          label: "Customer stories",
-          description: "Browse Firecrawl success stories",
-          href: "/blog/category/customer-stories",
-        }}
-        sideLabel="Customer Stories"
-      />
-    ),
-  },
-  {
-    label: "Playground",
-    href: "/playground",
-  },
-  {
-    label: "Docs",
-    href: "https://docs.firecrawl.dev",
-  },
-  {
-    label: "Pricing",
-    href: "/pricing",
-  },
-  {
-    label: "Blog",
-    href: "/blog",
-  },
-  {
-    label: "Extract",
-    href: "#",
-    dropdown: (
-      <HeaderDropdownContent
-        navigationItems={[
-          {
-            label: "Extract API",
-            items: [
-              // { icon: <Templates />, label: 'Templates', description: 'Jumpstart your web scraping', href: '/templates' },
-              {
-                icon: (
-                  <RenderEndpointIcon
-                    icon={EndpointsExtract}
-                    alwaysHeat
-                    triggerOnHover
-                  />
-                ),
-                label: "Extract",
-                description: "Get structured data from entire websites",
-                href: "/extract",
-              },
-              {
-                icon: (
-                  <div className="text-heat-100">
-                    <Platforms />
-                  </div>
-                ),
-                label: "Playground",
-                description: "Try it out in the /extract playground",
-                href: "/app/extract-playground",
-              },
-              // { icon: <ArrowRight/>, label: 'Docs', description: 'Read the docs.', href: 'https://docs.firecrawl.dev/features/extract', target: '_blank' },
-            ],
-          },
-        ]}
-        sideContent={
-          <div className="py-24 px-44 border-b border-border-faint relative overflow-clip">
-            {/* <div className="size-40 relative mb-17"> */}
-            {/*  */}
-            {/* </div> */}
-
-            <div className="text-label-large">
-              Get web data with a prompt. <br />
-              Collect structured data from any number of URLs or entire domains.
-            </div>
-
-            <GithubFlame />
-          </div>
-        }
-        sideItem={{
-          icon: <ArrowRight />,
-          label: "See Docs",
-          description: "Read the docs.",
-          href: "https://docs.firecrawl.dev/features/extract",
-        }}
-        sideLabel="/extract"
-      />
-    ),
-  },
-  {
-    label: "Resources",
-    href: "#",
-    dropdown: (
-      <HeaderDropdownContent
-        navigationItems={[
-          {
-            label: "Resources",
-            items: [
-              // { icon: <Templates />, label: 'Templates', description: 'Jumpstart your web scraping', href: '/templates' },
-              {
-                icon: <Changelog />,
-                label: "Changelog",
-                description: "Latest APl updates for Firecrawl",
-                href: "/changelog",
-              },
-              {
-                icon: <Api />,
-                label: "API Status",
-                description: "See maintenance, uptime and more",
-                href: "https://firecrawl.betteruptime.dev/",
-                target: "_blank",
-              },
-              {
-                icon: <Careers />,
-                label: "Careers",
-                description: "Join our team, we're hiring!",
-                href: "/careers",
-              },
-              {
-                icon: <Affiliate />,
-                label: "Creator & OSS Program",
-                description: "Earn rewards for referring customers",
-                href: "/creator-oss-program",
-              },
-              {
-                icon: <Student />,
-                label: "Student Program",
-                description: "Get free credits for your projects",
-                href: "/student-program",
-              },
-              {
-                icon: <MCPIcon />,
-                label: "MCP",
-                description: "Connect Firecrawl to agents",
-                href: "https://docs.firecrawl.dev/features/mcp",
-              },
-            ],
-          },
-        ]}
-        sideContent={<HeaderDropdownGithub />}
-        sideItem={{
-          icon: <ArrowRight />,
-          label: "See Github",
-          description: "View the repository",
-          href: "https://github.com/drewsephski/nodebase",
-        }}
-        sideLabel="Open Source"
-      />
-    ),
+    dropdown: <WorkflowsDropdown />,
   },
 ];

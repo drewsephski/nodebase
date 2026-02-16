@@ -29,10 +29,10 @@ import WorkflowBuilder from "@/components/app/(home)/sections/workflow-builder/W
 // Import header components
 import HeaderBrandKit from "@/components/shared/header/BrandKit/BrandKit";
 import HeaderWrapper from "@/components/shared/header/Wrapper/Wrapper";
-import HeaderDropdownWrapper from "@/components/shared/header/Dropdown/Wrapper/Wrapper";
 import GithubIcon from "@/components/shared/header/Github/_svg/GithubIcon";
 import ButtonUI from "@/components/ui/shadcn/button";
 import { RainbowButton } from "@/components/ui/rainbow-button";
+import HeaderNav from "@/components/shared/header/Nav/Nav";
 
 
 function StyleGuidePageContent() {
@@ -57,6 +57,12 @@ function StyleGuidePageContent() {
     if (view === 'workflows') {
       setShowStep2(true);
       setShowWorkflowBuilder(false);
+    } else if (view === 'builder') {
+      // Direct link to blank canvas workflow builder
+      setLoadWorkflowId(null);
+      setLoadTemplateId(null);
+      setShowWorkflowBuilder(true);
+      setShowStep2(false);
     } else if (workflowId) {
       setLoadWorkflowId(workflowId);
       setShowWorkflowBuilder(true);
@@ -102,12 +108,8 @@ function StyleGuidePageContent() {
       ) : (
       <div className="min-h-screen bg-background-base">
         {/* Header/Navigation Section */}
-        <HeaderDropdownWrapper />
-        
-        <div className="sticky top-0 left-0 w-full z-[101] bg-background-base header">
+        <div className="sticky top-0 left-0 w-full z-[101] bg-background-base/95 backdrop-blur-md header border-b border-border-faint/50">
           <div className="absolute top-0 cmw-container border-x border-border-faint h-full pointer-events-none" />
-          
-          <div className="h-1 bg-border-faint w-full left-0 -bottom-1 absolute" />
           
           <div className="cmw-container absolute h-full pointer-events-none top-0">
             <Connector className="absolute -left-[10.5px] -bottom-11" />
@@ -115,16 +117,29 @@ function StyleGuidePageContent() {
           </div>
           
           <HeaderWrapper>
-            <div className="max-w-[900px] mx-auto w-full flex justify-between items-center">
-              <div className="flex gap-24 items-center">
+            <div className="w-full flex justify-between items-center gap-16">
+              {/* Left side - Logo */}
+              <div className="flex items-center flex-shrink-0">
                 <HeaderBrandKit />
               </div>
               
-              <div className="flex gap-8 items-center">
+              {/* Center - Navigation */}
+              <div className="hidden lg:flex items-center justify-center flex-1">
+                <HeaderNav />
+              </div>
+              
+              {/* Right side - Actions */}
+              <div className="flex gap-8 items-center flex-shrink-0">
                 {/* GitHub Rainbow Button */}
-                <RainbowButton size="lg" onClick={() => window.open("https://github.com/drewsephski/nodebase", "_blank")}>
-                  View on GitHub
-                </RainbowButton>
+                <ButtonUI variant="secondary">
+                  <a 
+                    href="https://github.com/drewsephski/nodebase" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                  >
+                    View on GitHub
+                  </a>
+                </ButtonUI>
 
                 {/* Clerk Auth */}
                 <SignedOut>
@@ -174,11 +189,6 @@ function StyleGuidePageContent() {
                     Build, run, and share AI workflows in an open-source visual studio.
                     <br className="lg-max:hidden" />
                     Orchestrate agents, tools, and approvals with live streaming output.
-                    <span className="lg:ml-4 lg-max:mt-8 lg-max:mx-auto lg:max:w-max lg:inline-block">
-                      <RainbowButton size="default" onClick={() => window.open("https://github.com/drewsephski/nodebase", "_blank")}>
-                        Star on GitHub
-                      </RainbowButton>
-                    </span>
                   </p>
                 </motion.div>
               ) : (

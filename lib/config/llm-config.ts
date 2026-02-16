@@ -8,7 +8,7 @@
 export interface LLMModel {
   id: string;
   name: string;
-  provider: 'anthropic' | 'openai' | 'groq';
+  provider: 'anthropic' | 'openai' | 'groq' | 'openrouter';
   contextWindow: number;
   inputCostPer1M: number;
   outputCostPer1M: number;
@@ -114,12 +114,92 @@ export const llmProviders: LLMProvider[] = [
       },
     ],
   },
+  {
+    id: 'openrouter',
+    name: 'OpenRouter',
+    envKey: 'OPENROUTER_API_KEY',
+    defaultModel: 'openai/gpt-oss-120b',
+    models: [
+      {
+        id: 'openai/gpt-oss-120b',
+        name: 'GPT OSS 120B (via OpenRouter)',
+        provider: 'openrouter',
+        contextWindow: 128000,
+        inputCostPer1M: 0.20,
+        outputCostPer1M: 0.20,
+        supportsJSON: true,
+        supportsMCP: false,
+        maxTokens: 32768,
+        description: 'GPT OSS 120B - Default model via OpenRouter',
+      },
+      {
+        id: 'anthropic/claude-3.5-sonnet',
+        name: 'Claude 3.5 Sonnet (via OpenRouter)',
+        provider: 'openrouter',
+        contextWindow: 200000,
+        inputCostPer1M: 3.00,
+        outputCostPer1M: 15.00,
+        supportsJSON: true,
+        supportsMCP: false,
+        maxTokens: 8192,
+        description: 'Claude 3.5 Sonnet through OpenRouter unified API',
+      },
+      {
+        id: 'openai/gpt-4o',
+        name: 'GPT-4o (via OpenRouter)',
+        provider: 'openrouter',
+        contextWindow: 128000,
+        inputCostPer1M: 2.50,
+        outputCostPer1M: 10.00,
+        supportsJSON: true,
+        supportsMCP: false,
+        maxTokens: 16384,
+        description: 'GPT-4o through OpenRouter unified API',
+      },
+      {
+        id: 'google/gemini-2.0-flash-001',
+        name: 'Gemini 2.0 Flash (via OpenRouter)',
+        provider: 'openrouter',
+        contextWindow: 1000000,
+        inputCostPer1M: 0.10,
+        outputCostPer1M: 0.40,
+        supportsJSON: true,
+        supportsMCP: false,
+        maxTokens: 8192,
+        description: 'Google Gemini 2.0 Flash through OpenRouter',
+      },
+      {
+        id: 'meta-llama/llama-3.1-405b-instruct',
+        name: 'Llama 3.1 405B (via OpenRouter)',
+        provider: 'openrouter',
+        contextWindow: 128000,
+        inputCostPer1M: 0.80,
+        outputCostPer1M: 0.80,
+        supportsJSON: true,
+        supportsMCP: false,
+        maxTokens: 16384,
+        description: 'Meta Llama 3.1 405B through OpenRouter',
+      },
+      {
+        id: 'deepseek/deepseek-r1',
+        name: 'DeepSeek R1 (via OpenRouter)',
+        provider: 'openrouter',
+        contextWindow: 128000,
+        inputCostPer1M: 0.55,
+        outputCostPer1M: 2.19,
+        supportsJSON: true,
+        supportsMCP: false,
+        maxTokens: 16384,
+        description: 'DeepSeek R1 reasoning model through OpenRouter',
+      },
+    ],
+  },
 ];
 
 /**
  * Get default model for a provider
  */
-export function getDefaultModel(provider: 'anthropic' | 'openai' | 'groq'): string {
+export function getDefaultModel(provider: 'anthropic' | 'openai' | 'groq' | 'openrouter'): string {
   const config = llmProviders.find(p => p.id === provider);
   return config?.defaultModel || '';
 }
@@ -127,7 +207,7 @@ export function getDefaultModel(provider: 'anthropic' | 'openai' | 'groq'): stri
 /**
  * Get all models for a provider
  */
-export function getModelsForProvider(provider: 'anthropic' | 'openai' | 'groq'): LLMModel[] {
+export function getModelsForProvider(provider: 'anthropic' | 'openai' | 'groq' | 'openrouter'): LLMModel[] {
   const config = llmProviders.find(p => p.id === provider);
   return config?.models || [];
 }
@@ -165,7 +245,7 @@ export function getAllModels(): Array<LLMModel & { fullId: string }> {
 /**
  * Check if provider API key is configured
  */
-export function isProviderConfigured(provider: 'anthropic' | 'openai' | 'groq'): boolean {
+export function isProviderConfigured(provider: 'anthropic' | 'openai' | 'groq' | 'openrouter'): boolean {
   const config = llmProviders.find(p => p.id === provider);
   if (!config) return false;
 

@@ -45,12 +45,14 @@ export async function POST(
       anthropic?: string;
       groq?: string;
       openai?: string;
+      openrouter?: string;
       firecrawl?: string;
       arcade?: string;
     } = {
       anthropic: (userId ? await getLLMApiKey('anthropic', userId) : null) || process.env.ANTHROPIC_API_KEY,
       groq: (userId ? await getLLMApiKey('groq', userId) : null) || process.env.GROQ_API_KEY,
       openai: (userId ? await getLLMApiKey('openai', userId) : null) || process.env.OPENAI_API_KEY,
+      openrouter: (userId ? await getLLMApiKey('openrouter', userId) : null) || process.env.OPENROUTER_API_KEY,
       firecrawl: process.env.FIRECRAWL_API_KEY,
       arcade: process.env.ARCADE_API_KEY,
     };

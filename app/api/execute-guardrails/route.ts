@@ -283,6 +283,28 @@ async function analyzeWithLLM(
 
     const text = response.choices[0]?.message?.content || '{}';
     return JSON.parse(text);
+  } else if (provider === 'openrouter' && apiKeys.openrouter) {
+    // Use OpenRouter AI SDK provider
+    const { createOpenRouter } = await import('@openrouter/ai-sdk-provider');
+    const { generateText } = await import('ai');
+    
+    const openrouter = createOpenRouter({
+      apiKey: apiKeys.openrouter,
+    });
+
+    const result = await generateText({
+      model: openrouter(modelName),
+      prompt,
+    });
+
+    const text = result.text;
+    // Extract JSON from response
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[0]);
+    }
+
+    throw new Error('No JSON found in response');
   }
 
   throw new Error(`Unsupported provider: ${provider}`);
