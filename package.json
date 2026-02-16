@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "lsof -ti:3000,3001 | xargs kill -9 2>/dev/null || true && next dev",
     "dev:all": "concurrently \"npx convex dev\" \"npm run dev\"",
-    "build": "next build",
+    "build": "NEXT_DISABLE_TURBOPACK=1 next build",
     "start": "next start",
     "lint": "next lint",
     "test": "playwright test",
