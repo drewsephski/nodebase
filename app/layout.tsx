@@ -11,7 +11,8 @@ import Scrollbar from "@/components/ui/scrollbar";
 import { BigIntProvider } from "@/components/providers/BigIntProvider";
 import "styles/main.css";
 
-const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
+const convex = convexUrl ? new ConvexReactClient(convexUrl) : null;
 
 const robotoMono = Roboto_Mono({
   subsets: ["latin"],
@@ -27,27 +28,35 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const content = (
+    <html lang="en">
+      <head>
+        <title>Nodebase</title>
+        <meta name="description" content="Build Nodebase workflows and automations with a visual programming canvas" />
+        <link rel="icon" href="/favicon.png" />
+        <ColorStyles />
+      </head>
+      <body
+        className={`${GeistMono.variable} ${robotoMono.variable} font-sans text-accent-black bg-background-base overflow-x-clip`}
+      >
+        <BigIntProvider>
+          <main className="overflow-x-clip">{children}</main>
+          <Scrollbar />
+          <Toaster position="bottom-right" />
+        </BigIntProvider>
+      </body>
+    </html>
+  );
+
   return (
     <ClerkProvider>
-      <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
-        <html lang="en">
-          <head>
-            <title>Nodebase</title>
-            <meta name="description" content="Build Nodebase workflows and automations with a visual programming canvas" />
-            <link rel="icon" href="/favicon.png" />
-            <ColorStyles />
-          </head>
-          <body
-            className={`${GeistMono.variable} ${robotoMono.variable} font-sans text-accent-black bg-background-base overflow-x-clip`}
-          >
-            <BigIntProvider>
-              <main className="overflow-x-clip">{children}</main>
-              <Scrollbar />
-              <Toaster position="bottom-right" />
-            </BigIntProvider>
-          </body>
-        </html>
-      </ConvexProviderWithClerk>
+      {convex ? (
+        <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
+          {content}
+        </ConvexProviderWithClerk>
+      ) : (
+        content
+      )}
     </ClerkProvider>
   );
 }
