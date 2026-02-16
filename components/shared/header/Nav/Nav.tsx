@@ -310,7 +310,7 @@ export const NAV_ITEMS = [
           icon: <ArrowRight />,
           label: "See Github",
           description: "View the repository",
-          href: "https://github.com/firecrawl/firecrawl",
+          href: "https://github.com/drewsephski/nodebase",
         }}
         sideLabel="Open Source"
       />

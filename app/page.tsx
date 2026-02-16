@@ -32,6 +32,8 @@ import HeaderWrapper from "@/components/shared/header/Wrapper/Wrapper";
 import HeaderDropdownWrapper from "@/components/shared/header/Dropdown/Wrapper/Wrapper";
 import GithubIcon from "@/components/shared/header/Github/_svg/GithubIcon";
 import ButtonUI from "@/components/ui/shadcn/button";
+import { RainbowButton } from "@/components/ui/rainbow-button";
+
 
 function StyleGuidePageContent() {
   const router = useRouter();
@@ -119,17 +121,10 @@ function StyleGuidePageContent() {
               </div>
               
               <div className="flex gap-8 items-center">
-                {/* GitHub Template Button */}
-                <a
-                  className="contents"
-                  href="https://github.com/firecrawl/firecrawl"
-                  target="_blank"
-                >
-                  <ButtonUI variant="secondary">
-                    <GithubIcon />
-                    Use this Template
-                  </ButtonUI>
-                </a>
+                {/* GitHub Rainbow Button */}
+                <RainbowButton size="lg" onClick={() => window.open("https://github.com/drewsephski/nodebase", "_blank")}>
+                  View on GitHub
+                </RainbowButton>
 
                 {/* Clerk Auth */}
                 <SignedOut>
@@ -176,16 +171,14 @@ function StyleGuidePageContent() {
                   <HomeHeroTitle />
 
                   <p className="text-center text-body-large">
-                    Build intelligent web scraping workflows powered by AI.
+                    Build, run, and share AI workflows in an open-source visual studio.
                     <br className="lg-max:hidden" />
-                    Turn any website into structured, agent-ready data.
-                    <Link
-                      className="bg-black-alpha-4 hover:bg-black-alpha-6 lg:ml-4 rounded-6 px-8 lg:px-6 text-label-large lg-max:py-2 h-30 lg:h-24 block lg-max:mt-8 lg-max:mx-auto lg-max:w-max lg:inline-block gap-4 transition-all"
-                      href="https://firecrawl.dev"
-                      target="_blank"
-                    >
-                      AI agent workflows
-                    </Link>
+                    Orchestrate agents, tools, and approvals with live streaming output.
+                    <span className="lg:ml-4 lg-max:mt-8 lg-max:mx-auto lg:max:w-max lg:inline-block">
+                      <RainbowButton size="default" onClick={() => window.open("https://github.com/drewsephski/nodebase", "_blank")}>
+                        Star on GitHub
+                      </RainbowButton>
+                    </span>
                   </p>
                 </motion.div>
               ) : (
@@ -231,7 +224,7 @@ function StyleGuidePageContent() {
               <SignedIn>
                 <button
                   onClick={handleSubmit}
-                  className="bg-heat-100 hover:bg-heat-200 text-white font-medium px-32 py-12 rounded-10 transition-all active:scale-[0.98] text-body-medium shadow-md cursor-pointer"
+                  className="bg-heat-100 text-white font-medium px-32 py-12 rounded-10 transition-all duration-300 ease-out text-body-medium shadow-md cursor-pointer hover:shadow-[0_0_20px_2px_rgba(250,93,25,0.35)] hover:brightness-[1.08] active:brightness-[0.95] active:shadow-[0_0_12px_1px_rgba(250,93,25,0.25)]"
                 >
                   Start building
                 </button>
@@ -240,7 +233,7 @@ function StyleGuidePageContent() {
               {/* When signed out - open sign-in modal */}
               <SignedOut>
                 <SignInButton mode="modal">
-                  <button className="bg-heat-100 hover:bg-heat-200 text-white font-medium px-32 py-12 rounded-10 transition-all active:scale-[0.98] text-body-medium shadow-md cursor-pointer">
+                  <button className="bg-heat-100 text-white font-medium px-32 py-12 rounded-10 transition-all duration-300 ease-out text-body-medium shadow-md cursor-pointer hover:shadow-[0_0_20px_2px_rgba(250,93,25,0.35)] hover:brightness-[1.08] active:brightness-[0.95] active:shadow-[0_0_12px_1px_rgba(250,93,25,0.25)]">
                     Start building
                   </button>
                 </SignInButton>

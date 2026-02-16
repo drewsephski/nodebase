@@ -99,7 +99,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       >
         {/* Primary variant gradient overlay */}
         {variant === "primary" && (
-          <div className="absolute inset-0 rounded-inherit bg-gradient-to-b from-white/6 to-transparent pointer-events-none" />
+          <div className="absolute inset-0 rounded-[inherit] bg-gradient-to-b from-white/6 to-transparent pointer-events-none" />
         )}
 
         {/* Loading spinner */}
