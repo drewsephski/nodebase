@@ -12,6 +12,8 @@ export async function executeAgentNode(
   state: WorkflowState,
   apiKeys?: { anthropic?: string; groq?: string; openai?: string; openrouter?: string; firecrawl?: string }
 ): Promise<any> {
+  console.log('🔥 EXECUTE AGENT NODE - START', { nodeId: node.id, nodeName: node.data?.nodeName, model: node.data?.model });
+  
   const { data } = node;
 
   try {
@@ -36,6 +38,14 @@ export async function executeAgentNode(
     if (!apiKeys) {
       throw new Error('API keys are required for server-side execution');
     }
+
+    // Debug logging
+    console.log('Agent execution - API keys status:', {
+      anthropic: apiKeys.anthropic ? 'present' : 'missing',
+      openai: apiKeys.openai ? 'present' : 'missing',
+      groq: apiKeys.groq ? 'present' : 'missing',
+      openrouter: apiKeys.openrouter ? 'present' : 'missing',
+    });
 
     // Server-side execution only
     if (process.env.MOCK_AGENT_RESPONSE) {
@@ -84,9 +94,19 @@ export async function executeAgentNode(
       : [{ role: 'user' as const, content: contextualPrompt }];
 
     // Parse model string (handle models with slashes like groq/openai/gpt-oss-120b)
-    const modelString = data.model || 'openai/gpt-oss-120b:free';
+    const modelString = data.model || 'openrouter/free';
     let provider: string;
     let modelName: string;
+
+    console.log('========================================');
+    console.log('AGENT NODE EXECUTION');
+    console.log('Model from workflow:', modelString);
+    console.log('API Keys present:', { 
+      anthropic: apiKeys?.anthropic ? 'YES' : 'NO',
+      openrouter: apiKeys?.openrouter ? 'YES' : 'NO',
+      openai: apiKeys?.openai ? 'YES' : 'NO',
+      groq: apiKeys?.groq ? 'YES' : 'NO'
+    });
 
     if (modelString.includes('/')) {
       const firstSlashIndex = modelString.indexOf('/');
@@ -96,6 +116,61 @@ export async function executeAgentNode(
       provider = 'openai';
       modelName = modelString;
     }
+
+    console.log('Parsed provider:', provider, 'model:', modelName);
+
+    // FORCE ROUTE TO OPENROUTER IF ANTHROPIC REQUESTED BUT NO KEY
+    if (provider === 'anthropic') {
+      if (!apiKeys?.anthropic || apiKeys.anthropic.trim() === '') {
+        console.log('ANTHROPIC requested but NO KEY - forcing to openrouter/free');
+        provider = 'openrouter';
+        modelName = 'minimax/minimax-m2.5:free';
+      }
+    }
+
+    // Also check if requested provider has no key but openrouter does
+    const hasAnthropicKey = !!(apiKeys?.anthropic && apiKeys.anthropic.trim());
+    const hasOpenAIKey = !!(apiKeys?.openai && apiKeys.openai.trim());
+    const hasGroqKey = !!(apiKeys?.groq && apiKeys.groq.trim());
+    const hasOpenRouterKey = !!(apiKeys?.openrouter && apiKeys.openrouter.trim());
+
+    console.log('Has keys:', { anthropic: hasAnthropicKey, openai: hasOpenAIKey, groq: hasGroqKey, openrouter: hasOpenRouterKey });
+
+    // If the requested provider has no key, but OpenRouter has a key, use OpenRouter
+    if (provider === 'anthropic' && !hasAnthropicKey && hasOpenRouterKey) {
+      console.log('Routing anthropic through openrouter');
+      provider = 'openrouter';
+      modelName = 'minimax/minimax-m2.5:free';
+    } else if (provider === 'openai' && !hasOpenAIKey && hasOpenRouterKey) {
+      console.log('Routing openai through openrouter');
+      provider = 'openrouter';
+      modelName = 'minimax/minimax-m2.5:free';
+    } else if (provider === 'groq' && !hasGroqKey && hasOpenRouterKey) {
+      console.log('Routing groq through openrouter');
+      provider = 'openrouter';
+      modelName = 'minimax/minimax-m2.5:free';
+    }
+
+    // FINAL FALLBACK: If we still don't have a key for this provider and openrouter has key
+    const providerHasKey = {
+      anthropic: hasAnthropicKey,
+      openai: hasOpenAIKey,
+      groq: hasGroqKey,
+      openrouter: hasOpenRouterKey,
+    };
+
+    if (!providerHasKey[provider as keyof typeof providerHasKey]) {
+      if (hasOpenRouterKey) {
+        console.log('No key for', provider, '- using openrouter/minimax-minimax-m2.5-free');
+        provider = 'openrouter';
+        modelName = 'minimax/minimax-m2.5:free';
+      } else {
+        console.log('ERROR: No key available for', provider, 'and no openrouter key');
+      }
+    }
+
+    console.log('Final provider:', provider, 'model:', modelName);
+    console.log('========================================');
 
     // Use native SDKs for better MCP support
     let responseText = '';
@@ -387,9 +462,9 @@ export async function executeAgentNode(
         apiKey: apiKeys.openrouter,
       });
 
-      // Use the OpenRouter model directly (modelName includes provider, e.g., "anthropic/claude-3.5-sonnet")
+      // Use the OpenRouter chat model (modelName includes provider, e.g., "anthropic/claude-3.5-sonnet")
       const result = await generateText({
-        model: openrouter(modelName),
+        model: openrouter.chat(modelName),
         messages: messages as any,
       });
 

@@ -71,7 +71,7 @@ export function initializeDefaultWorkflows() {
             nodeName: 'Analyze Content',
             name: 'Analyzer',
             instructions: 'Summarize this website in 2-3 sentences. Focus on what they do and their main value proposition.',
-            model: 'anthropic/claude-sonnet-4-20250514',
+            model: 'openrouter/free',
             outputFormat: 'Text',
           },
         },

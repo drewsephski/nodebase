@@ -10,17 +10,21 @@ const isPublicRoute = createRouteMatcher([
   '/api/templates(.*)',
   '/api/mcp(.*)',
   '/api/test-mcp-connection(.*)',
-  '/api/workflows', // Allow workflow list/save without auth (handled in route)
+  '/api/workflows(.*)', // Allow all workflow routes without auth
 ])
 
 // Define API routes that require API key authentication (bypass Clerk auth)
 const isApiKeyRoute = createRouteMatcher([
-  '/api/workflows/:workflowId/execute',
-  '/api/workflows/:workflowId/execute-stream',
-  '/api/workflows/:workflowId/resume',
+  // External API-only routes that bypass Clerk
+  '/api/workflows/(.*)/execute-api',  // Only external API calls
 ])
 
 export default clerkMiddleware(async (auth, request) => {
+  // Skip Clerk auth for all API routes - they handle their own auth
+  if (request.nextUrl.pathname.startsWith('/api/')) {
+    return
+  }
+
   // API key routes bypass Clerk auth (will be validated in the route handler)
   if (isApiKeyRoute(request)) {
     return

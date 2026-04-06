@@ -147,7 +147,7 @@ Provide a concise 3-paragraph report including:
 3. Target market and competitive position
 
 Keep it brief and factual. This is a demonstration workflow.`,
-        model: 'anthropic/claude-sonnet-4-20250514',
+        model: 'openrouter/free',
         outputFormat: 'Text',
       },
     },
@@ -169,7 +169,7 @@ Requirements:
 - Must have recent information (2024-2025)
 
 Respond with ONLY one word: "PASS" if the report meets requirements, "FAIL" if it needs more research.`,
-        model: 'anthropic/claude-sonnet-4-20250514',
+        model: 'openrouter/free',
         outputFormat: 'Text',
       },
     },
@@ -206,7 +206,7 @@ Extract and return ONLY valid JSON with this exact structure:
   "keyFeatures": ["Feature 1", "Feature 2", "Feature 3"],
   "recentNews": "Summary of recent developments"
 }`,
-        model: 'anthropic/claude-sonnet-4-20250514',
+        model: 'openrouter/free',
         outputFormat: 'JSON',
         jsonSchema: {
           type: 'object',
@@ -295,7 +295,7 @@ Structure the report with:
 (Key takeaways and recommendations)
 
 Make it professional, detailed, and well-formatted for a Google Doc.`,
-        model: 'anthropic/claude-sonnet-4-20250514',
+        model: 'openrouter/free',
         outputFormat: 'Text',
       },
     },

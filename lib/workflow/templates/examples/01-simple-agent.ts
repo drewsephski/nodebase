@@ -52,7 +52,7 @@ export const simpleAgent: Workflow = {
 {{input.question}}
 
 Provide a well-structured response that is informative and easy to understand.`,
-        model: 'anthropic/claude-sonnet-4-20250514',
+        model: 'openrouter/free',
         outputFormat: 'Text',
       },
     },

@@ -67,7 +67,7 @@ export const agentWithFirecrawl: Workflow = {
 4. Synthesize the information into a clear, well-organized summary
 
 Provide a comprehensive summary with key findings, organized by topic or source.`,
-        model: 'anthropic/claude-sonnet-4-20250514', // Also: openai/gpt-4o or groq/gpt-oss-20b
+        model: 'openrouter/free', // Also: openai/gpt-4o or groq/gpt-oss-20b
         outputFormat: 'Text',
         mcpTools: [
           {

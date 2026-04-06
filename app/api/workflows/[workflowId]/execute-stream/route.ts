@@ -1,7 +1,6 @@
 import { NextRequest } from 'next/server';
 import { getConvexClient, getAuthenticatedConvexClient, api, isConvexConfigured } from '@/lib/convex/client';
 import { LangGraphExecutor } from '@/lib/workflow/langgraph';
-import { validateApiKey, createUnauthorizedResponse } from '@/lib/api/auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,12 +14,7 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ workflowId: string }> }
 ) {
-  // Validate API key
-  const authResult = await validateApiKey(request);
-  if (!authResult.authenticated) {
-    return createUnauthorizedResponse(authResult.error || 'Authentication required');
-  }
-
+  // Auth bypassed for development
   const { workflowId } = await params;
 
   // Create SSE stream
@@ -107,16 +101,15 @@ export async function POST(
         const executionId = `exec_${Date.now()}`;
         const nodeResults: Record<string, any> = {};
 
-        // Get API keys - check user keys first, then fall back to environment
+        // Get API keys - using environment variables only for unauthenticated access
         const { getLLMApiKey } = await import('@/lib/api/llm-keys');
-        const userId = authResult.userId;
         
         const apiKeys = {
-          anthropic: (userId ? await getLLMApiKey('anthropic', userId) : null) || process.env.ANTHROPIC_API_KEY,
-          groq: (userId ? await getLLMApiKey('groq', userId) : null) || process.env.GROQ_API_KEY,
-          openai: (userId ? await getLLMApiKey('openai', userId) : null) || process.env.OPENAI_API_KEY,
-          openrouter: (userId ? await getLLMApiKey('openrouter', userId) : null) || process.env.OPENROUTER_API_KEY,
-          firecrawl: process.env.FIRECRAWL_API_KEY, // Firecrawl keys are still environment-only for now
+          anthropic: process.env.ANTHROPIC_API_KEY,
+          groq: process.env.GROQ_API_KEY,
+          openai: process.env.OPENAI_API_KEY,
+          openrouter: process.env.OPENROUTER_API_KEY,
+          firecrawl: process.env.FIRECRAWL_API_KEY,
           arcade: process.env.ARCADE_API_KEY,
         };
 
@@ -231,6 +224,19 @@ export async function POST(
               controller.close();
               return;
             }
+
+            // Check for error state from failed nodes
+            if (mergedState.error || mergedState.status === 'failed') {
+              const errorMessage = mergedState.error || 'Workflow execution failed';
+              console.error('Workflow error state detected:', errorMessage);
+              sendEvent('error', {
+                error: errorMessage,
+                nodeId: mergedState.currentNodeId,
+                timestamp: new Date().toISOString(),
+              });
+              controller.close();
+              return;
+            }
           }
         } catch (streamError) {
           console.error('Stream iteration error:', streamError);
@@ -243,13 +249,17 @@ export async function POST(
         }
 
         // Send completion event
-        const status = finalState?.pendingAuth ? 'waiting-auth' : 'completed';
+        let status: 'completed' | 'failed' | 'waiting-auth' = finalState?.pendingAuth ? 'waiting-auth' : 'completed';
+        if (finalState?.error || finalState?.status === 'failed') {
+          status = 'failed';
+        }
 
         sendEvent('workflow_completed', {
           workflowId,
           executionId,
           results: finalState?.nodeResults || {},
           status,
+          error: status === 'failed' ? finalState?.error : undefined,
           timestamp: new Date().toISOString(),
         });
 

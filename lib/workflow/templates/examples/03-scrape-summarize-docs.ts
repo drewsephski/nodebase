@@ -84,7 +84,7 @@ Extract the main content, focusing on:
 - Important information
 
 Return the scraped content in a clean, organized format.`,
-        model: 'anthropic/claude-sonnet-4-20250514',
+        model: 'openrouter/free',
         outputFormat: 'Text',
         mcpTools: [
           {
@@ -114,7 +114,7 @@ Create a well-structured summary with:
 4. Conclusion
 
 Format it in a way that's suitable for a Google Doc.`,
-        model: 'anthropic/claude-sonnet-4-20250514',
+        model: 'openrouter/free',
         outputFormat: 'Text',
       },
     },

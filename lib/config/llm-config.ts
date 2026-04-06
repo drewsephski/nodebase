@@ -118,8 +118,20 @@ export const llmProviders: LLMProvider[] = [
     id: 'openrouter',
     name: 'OpenRouter',
     envKey: 'OPENROUTER_API_KEY',
-    defaultModel: 'openai/gpt-oss-120b',
+    defaultModel: 'openai/gpt-oss-120b:free',
     models: [
+      {
+        id: 'openai/gpt-oss-120b:free',
+        name: 'GPT OSS 120B (Free)',
+        provider: 'openrouter',
+        contextWindow: 128000,
+        inputCostPer1M: 0,
+        outputCostPer1M: 0,
+        supportsJSON: true,
+        supportsMCP: false,
+        maxTokens: 32768,
+        description: 'GPT OSS 120B - Free tier via OpenRouter (rate limited)',
+      },
       {
         id: 'openai/gpt-oss-120b',
         name: 'GPT OSS 120B (via OpenRouter)',

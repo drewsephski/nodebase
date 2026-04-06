@@ -469,7 +469,16 @@ export class LangGraphExecutor {
         result.completedAt = new Date().toISOString();
         this.onNodeUpdate?.(node.id, result);
 
-        throw error;
+        // Return error state instead of throwing - allows graceful error propagation via SSE
+        return {
+          variables: { lastOutput: null, error: result.error },
+          chatHistory: [],
+          currentNodeId: node.id,
+          nodeResults: { [node.id]: result },
+          pendingAuth: null,
+          error: result.error,
+          status: 'failed',
+        };
       }
     };
   }
@@ -1324,7 +1333,7 @@ export function workflowToLangGraphCode(workflow: Workflow): string {
         return `// ${data.nodeName || node.id} - AI Agent
 const ${node.id} = async (state: typeof StateAnnotation.State) => {
   const response = await anthropic.messages.create({
-    model: "${data.model || 'claude-3-5-sonnet-20241022'}",
+    model: "${data.model || 'minimax/minimax-m2.5:free'}",
     max_tokens: 4096,
     messages: [{
       role: 'user',

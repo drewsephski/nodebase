@@ -56,7 +56,7 @@ export async function executeExtractNode(
       }));
 
       const response = await client.responses.create({
-        model: 'gpt-4.1',
+        model: 'openrouter/free',
         tools,
         input: fullPrompt,
         text: {
@@ -73,7 +73,7 @@ export async function executeExtractNode(
 
       return {
         extractedData,
-        model: 'gpt-4.1',
+        model: 'openrouter/free',
         tokensUsed: response.usage?.total_tokens || 0,
         mcpToolsUsed: response.output.filter((item: any) => item.type === 'mcp_call').length,
         __variableUpdates: { lastOutput: extractedData }, // Return as separate field for reducer
@@ -82,7 +82,7 @@ export async function executeExtractNode(
 
     // No MCP - use regular Chat Completions with JSON mode
     const completion = await client.chat.completions.create({
-      model: data.model || 'gpt-5-mini',
+      model: data.model || 'openrouter/free',
       messages: [
         { role: 'user', content: fullPrompt },
       ],
