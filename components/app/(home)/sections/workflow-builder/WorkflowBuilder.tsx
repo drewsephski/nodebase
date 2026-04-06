@@ -1163,13 +1163,23 @@ function WorkflowBuilderInner({ onBack, initialWorkflowId, initialTemplateId }: 
 
   const handleRunWithInput = useCallback(async (input: string) => {
     console.log('📍 handleRunWithInput called with input:', input);
+    console.log('📍 Current workflow state:', workflow ? { id: workflow.id, name: workflow.name, nodeCount: workflow.nodes?.length } : 'NULL');
+    console.log('📍 Current nodes state:', nodes.length, 'nodes');
+    console.log('📍 Current edges state:', edges.length, 'edges');
 
     if (!workflow) {
-      console.error('❌ No workflow to run');
+      console.error('❌ No workflow to run - workflow state is null');
+      toast.error('No workflow available');
       return;
     }
 
-    console.log('✅ Workflow exists:', workflow.name);
+    if (!workflow.id) {
+      console.error('❌ Workflow has no ID');
+      toast.error('Workflow ID missing');
+      return;
+    }
+
+    console.log('✅ Workflow exists:', workflow.name, 'ID:', workflow.id);
 
     // Save the workflow before running to ensure it exists in Convex
     console.log('💾 Saving workflow before execution...');
@@ -1187,6 +1197,8 @@ function WorkflowBuilderInner({ onBack, initialWorkflowId, initialTemplateId }: 
       })) as any,
       edges: edges as any,
     });
+
+    console.log('💾 Save result:', saveSuccess);
 
     if (!saveSuccess) {
       toast.error('Failed to save workflow', {
@@ -1214,8 +1226,11 @@ function WorkflowBuilderInner({ onBack, initialWorkflowId, initialTemplateId }: 
       })) as any,
     };
 
-    console.log('🏃 Running workflow with', currentWorkflow.nodes.length, 'nodes');
+    console.log('🏃 Running workflow with ID:', currentWorkflow.id);
+    console.log('🏃 Workflow nodes:', currentWorkflow.nodes.length);
+    console.log('🏃 Calling runWorkflow...');
     await runWorkflow(currentWorkflow, input);
+    console.log('✅ runWorkflow returned');
   }, [workflow, nodes, edges, runWorkflow, saveWorkflowImmediate]);
 
 

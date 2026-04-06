@@ -66,8 +66,16 @@ export function useWorkflowExecution() {
   }, [isRunning]);
 
   const runWorkflow = useCallback(async (workflow: Workflow, input?: string) => {
+    console.log('🚀 runWorkflow called with workflow:', workflow ? { id: workflow.id, name: workflow.name, nodeCount: workflow.nodes?.length } : 'NULL');
+    
     if (!workflow) {
-      console.error('No workflow to execute');
+      console.error('❌ No workflow to execute');
+      return;
+    }
+
+    if (!workflow.id) {
+      console.error('❌ Workflow has no ID');
+      toast.error('Workflow ID is missing');
       return;
     }
 
@@ -83,8 +91,10 @@ export function useWorkflowExecution() {
 
     try {
       // Fetch API keys from server
+      console.log('🔑 Fetching API config...');
       const configResponse = await fetch('/api/config');
       const apiConfig = await configResponse.json();
+      console.log('🔑 API config received');
 
       // Execute workflow via LangGraph streaming API
 
@@ -99,6 +109,7 @@ export function useWorkflowExecution() {
         parsedInput = { input };
       }
 
+      console.log('📡 Calling execute-stream API for workflow:', workflow.id);
       const response = await fetch(`/api/workflows/${workflow.id}/execute-stream`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -106,8 +117,11 @@ export function useWorkflowExecution() {
         signal: abortControllerRef.current.signal,
       });
 
+      console.log('📡 API response status:', response.status, response.statusText);
+
       if (!response.ok) {
-        throw new Error('Workflow execution failed');
+        console.error('❌ API response not OK:', response.status, response.statusText);
+        throw new Error(`Workflow execution failed: ${response.status} ${response.statusText}`);
       }
 
       // Handle SSE stream
@@ -117,6 +131,8 @@ export function useWorkflowExecution() {
       if (!reader) {
         throw new Error('No response body');
       }
+
+      console.log('📡 Starting SSE stream processing...');
 
       let buffer = '';
       let executionId = '';
