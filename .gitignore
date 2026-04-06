@@ -46,3 +46,7 @@ post_migrator.py
 
 # Server
 firecrawl-responses-api/.env
+
+# clerk configuration (can include secrets)
+/.clerk/
+.env*.local

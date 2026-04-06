@@ -19,7 +19,7 @@ function WorkflowsDropdown() {
         </div>
         
         {/* Content */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 p-4">
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-neutral-900 group-hover:text-orange-900 transition-colors duration-200">
               Start a Workflow
@@ -47,7 +47,7 @@ function WorkflowsDropdown() {
         </div>
         
         {/* Content */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 p-4">
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-neutral-900 group-hover:text-orange-900 transition-colors duration-200">
               View Templates

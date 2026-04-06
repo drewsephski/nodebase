@@ -166,10 +166,12 @@ export function useWorkflow(workflowId?: string) {
         if (data.success && data.workflowId) {
           setConvexId(data.workflowId);
         }
+
+        return data.success; // <-- Added: return success status
       } catch (error) {
         console.error('Failed to save new workflow to Convex:', error);
+        return false; // <-- Added: return false on error
       }
-      return;
     }
 
     const updated: Workflow = {
@@ -254,7 +256,7 @@ export function useWorkflow(workflowId?: string) {
   const saveWorkflowImmediate = useCallback(async (updates?: Partial<Workflow>) => {
     if (!workflow) {
       console.warn('⚠️ Cannot save workflow immediately: no workflow state');
-      return;
+      return false;  // <-- Fixed: return false instead of undefined
     }
 
     const updated: Workflow = {

@@ -98,13 +98,11 @@ function StyleGuidePageContent() {
   return (
     <HeaderProvider>
       {showWorkflowBuilder ? (
-        <SignedIn>
-          <WorkflowBuilder
-            onBack={handleReset}
-            initialWorkflowId={loadWorkflowId}
-            initialTemplateId={loadTemplateId}
-          />
-        </SignedIn>
+        <WorkflowBuilder
+          onBack={handleReset}
+          initialWorkflowId={loadWorkflowId}
+          initialTemplateId={loadTemplateId}
+        />
       ) : (
       <div className="min-h-screen bg-background-base">
         {/* Header/Navigation Section */}
@@ -192,8 +190,7 @@ function StyleGuidePageContent() {
                   </p>
                 </motion.div>
               ) : (
-                <SignedIn>
-                  <motion.div
+                <motion.div
                     key="step2"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -217,7 +214,6 @@ function StyleGuidePageContent() {
                       }}
                     />
                   </motion.div>
-                </SignedIn>
               )}
             </AnimatePresence>
           </div>
@@ -240,13 +236,14 @@ function StyleGuidePageContent() {
                 </button>
               </SignedIn>
 
-              {/* When signed out - open sign-in modal */}
+              {/* When signed out - navigate to workflows without auth */}
               <SignedOut>
-                <SignInButton mode="modal">
-                  <button className="bg-heat-100 text-white font-medium px-32 py-12 rounded-10 transition-all duration-300 ease-out text-body-medium shadow-md cursor-pointer hover:shadow-[0_0_20px_2px_rgba(250,93,25,0.35)] hover:brightness-[1.08] active:brightness-[0.95] active:shadow-[0_0_12px_1px_rgba(250,93,25,0.25)]">
-                    Start building
-                  </button>
-                </SignInButton>
+                <button
+                  onClick={handleSubmit}
+                  className="bg-heat-100 text-white font-medium px-32 py-12 rounded-10 transition-all duration-300 ease-out text-body-medium shadow-md cursor-pointer hover:shadow-[0_0_20px_2px_rgba(250,93,25,0.35)] hover:brightness-[1.08] active:brightness-[0.95] active:shadow-[0_0_12px_1px_rgba(250,93,25,0.25)]"
+                >
+                  Start building
+                </button>
               </SignedOut>
             </motion.div>
           )}
