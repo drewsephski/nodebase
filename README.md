@@ -1,16 +1,9 @@
-# Nodebase
+# Nodebase has moved
 
-Nodebase is a visual canvas for wiring together AI agents, transforms, and tool integrations into repeatable workflows. Drag a start node, add agents (with optional MCP tools), plug in transforms or conditionals, and the runtime orchestrates execution with streaming updates, human approvals, and persistence via Convex.
+Nodebase has been sunset. Its next version is **[Nodebrowser](https://github.com/drewsephski/nodebrowser)**, a visual workflow builder focused on browser automation with Stagehand and Browserbase.
 
-## Core Capabilities
-- Visual workflow builder with Agent, Transform, MCP tool, Loop, Conditional, Approval, and End nodes.
-- LangGraph-powered execution that keeps state, streams progress, and handles interrupts.
-- Firecrawl MCP tools for live web scraping/search plus Arcade/HTTP integrations for external services.
-- Clerk authentication, Convex storage, and tenant-aware API endpoints for automation.
+Active development, setup instructions, and the latest source code now live in the Nodebrowser repository:
 
-## Quick Start
-1. `git clone https://github.com/drewsephski/nodebase.git` and `npm install`.
-2. Run `npm run dev` after setting `NEXT_PUBLIC_CONVEX_URL`, `FIRECRAWL_API_KEY`, and Clerk credentials in `.env.local`.
-3. Open the UI, build a workflow, and execute it—results stream in real time and persist in Convex.
+## [Continue to Nodebrowser →](https://github.com/drewsephski/nodebrowser)
 
-For deeper setup details, explore the `app/` directory and the workflow templates under `lib/workflow/templates`.
+This repository remains available for its history, but no further development is planned here.
